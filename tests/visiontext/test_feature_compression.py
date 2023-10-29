@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 
 from visiontext.iotools.feature_compression import feat_to_uint8, uint8_to_feat

@@ -1,10 +1,10 @@
 # visiontext
 
 <p align="center">
-<a href="https://github.com/gingsi/visiontext/actions/workflows/build_py37.yml">
+<a href="https://github.com/gingsi/visiontext/actions/workflows/build-py37-cpu.yml">
   <img alt="build 3.7 status" title="build 3.7 status" src="https://img.shields.io/github/actions/workflow/status/gingsi/visiontext/build_py37.yml?branch=main&label=build%203.7" />
 </a>
-<a href="https://github.com/gingsi/visiontext/actions/workflows/build_py39.yml">
+<a href="https://github.com/gingsi/visiontext/actions/workflows/build-py39-cpu.yml">
   <img alt="build 3.9 status" title="build 3.9 status" src="https://img.shields.io/github/actions/workflow/status/gingsi/visiontext/build_py39.yml?branch=main&label=build%203.9" />
 </a>
 <img alt="coverage" title="coverage" src="https://raw.githubusercontent.com/gingsi/visiontext/main/docs/coverage.svg" />
@@ -13,7 +13,7 @@
 </a>
 </p>
 
-Utilities for deep learning on multimodal data:
+Utilities for deep learning on multimodal data.
 
 * jupyter notebooks / jupyter lab / ipython
 * matplotlib
