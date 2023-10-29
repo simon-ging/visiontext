@@ -23,7 +23,7 @@ Utilities for deep learning on multimodal data.
 
 ## Install
 
-Requires `python>=3.7`
+Requires `python>=3.7` `pytorch` `sqlite`
 
 ```bash
 pip install visiontext
