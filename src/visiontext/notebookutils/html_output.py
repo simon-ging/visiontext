@@ -1,5 +1,4 @@
-from IPython.core.display import HTML
-from IPython.core.display_functions import display
+from IPython.display import display, HTML
 
 
 class NotebookHTMLPrinter:
