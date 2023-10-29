@@ -4,3 +4,6 @@ channels:
 dependencies:
   - defaults::python=3.9
   - conda-forge::sqlite
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - pytorch::cpuonly
