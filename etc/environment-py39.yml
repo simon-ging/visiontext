@@ -1,0 +1,6 @@
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - defaults::python=3.9
+  - conda-forge::sqlite
