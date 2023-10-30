@@ -4,8 +4,8 @@ from IPython.display import display, HTML
 class NotebookHTMLPrinter:
     """
     Class for printing things as HTML (Useful for jupyter notebooks)
-    Uses an internal buffer to aggregate HTML and then creates a single HTML output
-    This has advantages over calling display(HTML(...))) separately for each line because it allows
+    Uses an internal buffer to aggregate a bunch of HTML and then creates a single HTML output
+    This is better than calling display(HTML(...))) separately for each line because it allows
     for things to stay inside one output cell.
 
     Usage:
@@ -54,21 +54,24 @@ class NotebookHTMLPrinter:
     def close_table(self, output=True):
         self.print(f"</table>", output=output, end="")
 
-    def open_grid(self, max_width=300):
+    def open_grid(self, max_width=300, box_css="display: flex;", col_css=""):
         """Start creating a flexbox grid to output several HTML contents side by side"""
         self.grid_max_width = max_width
-        self.print(f"<div style='display: flex;'>", end="")
-        self._open_grid_column()
+        self.print(f"<div style='{box_css}'>", end="")
+        self._open_grid_column(col_css=col_css)
 
-    def _open_grid_column(self):
-        self.print(f"<div style='margin-right:10px; max-width:{self.grid_max_width}px;'>", end="")
+    def _open_grid_column(self, col_css=""):
+        width_css = ""
+        if self.grid_max_width is not None:
+            width_css = f"max-width:{self.grid_max_width}px;"
+        self.print(f"<div style='margin-right:10px;{width_css} {col_css}'>", end="")
 
     def _close_grid_column(self):
         self.print(f"</div>", end="")
 
-    def next_grid_column(self):
+    def next_grid_column(self, col_css=""):
         self._close_grid_column()
-        self._open_grid_column()
+        self._open_grid_column(col_css=col_css)
 
     def close_grid(self, output=True):
         self._close_grid_column()
