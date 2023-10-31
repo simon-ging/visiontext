@@ -1,9 +1,11 @@
+"""
+Color utilities for matplotlib and jupyter notebook
+"""
+
 from dataclasses import dataclass
+from matplotlib import colorbar as mpl_colorbar, colors as mpl_colors, pyplot as plt, cm as mpl_cm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from typing import Union, Tuple
-
-from matplotlib import colors as mpl_colors, pyplot as plt, cm as mpl_cm
-
-# transitions from red to green for bad to good values
 
 redgreen_bright = mpl_colors.LinearSegmentedColormap.from_list(
     "rwg", [[1.0, 0.7, 0.7], [1.0, 1.0, 1.0], [0.7, 1.0, 0.7]]
@@ -24,6 +26,9 @@ rbg_bright = mpl_colors.LinearSegmentedColormap.from_list(
         [0.7, 1.0, 0.7],
     ],
 )
+
+
+DEFAULT_COLOR_CYCLE = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
 
 def get_redgreen_for_theme(is_dark_theme: bool):
@@ -102,3 +107,96 @@ def create_colormap_for_dark_background(
     ccmap_colors_01 = [[_convert(a) for a in rgb] + [alpha] for rgb in ccmap_colors]
     ccmap = mpl_colors.LinearSegmentedColormap.from_list("better_nipy", ccmap_colors_01, N=n)
     return ccmap
+
+
+def get_colored_html_text(color_tuple, *text_args, sep=" ", end="\n"):
+    assert len(color_tuple) in [1, 3, 4] and [
+        0 <= ca <= 255 for ca in color_tuple
+    ], f"Invalid rgb tuple: {color_tuple}"
+    if len(color_tuple) == 1:
+        color_tuple = color_tuple * 3
+    hex_str = "".join([f"{ca:02x}" for ca in color_tuple])
+    args_joined = sep.join(text_args)
+    text = f"<span style='color:#{hex_str};'>{args_joined}</span>{end}"
+    text = text.replace("\n", "<br />")
+    return text
+
+
+def get_colored_html_text_from_lists(c_list, t_list, sep=""):
+    assert len(c_list) == len(  #
+        t_list
+    ), f"got {len(c_list)} colors and {len(t_list)} texts: {c_list}, {t_list}"
+    texts = []
+    for c, t in zip(c_list, t_list):
+        text = get_colored_html_text(c, t, sep="", end="")
+        texts.append(text)
+    full_text = sep.join(texts)
+    return full_text
+
+
+def add_colorbar(fig, fig_imshow, ax):
+    """Add colorbar to a given figure"""
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    fig.colorbar(fig_imshow, cax=cax)
+
+
+def show_colormap(input_cmap: Union[mpl_colors.Colormap, str]):
+    """
+    Show a colormap in a figure
+
+    Args:
+        input_cmap: Colormap or name of colormap
+
+    Returns:
+
+    """
+    if isinstance(input_cmap, str):
+        input_cmap = plt.get_cmap(input_cmap)
+    cmap_norm = mpl_colors.Normalize(vmin=0.0, vmax=1.0)
+    fig, ax = plt.subplots(1, 1, figsize=(16, 1))
+    mpl_colorbar.ColorbarBase(ax, cmap=input_cmap, norm=cmap_norm, orientation="horizontal")
+    fig.tight_layout()
+    return fig, ax
+
+
+def get_color_from_color_cycle(num, cycle):
+    return cycle[num % len(cycle)]
+
+
+def get_color_from_default_color_cycle(num):
+    return get_color_from_color_cycle(num, DEFAULT_COLOR_CYCLE)
+
+
+def get_color_from_simple_transition(i: int, i_max: int):
+    """
+    g->b->r color transition, 0 <= i < i_max
+    """
+    fact = (i / (i_max - 1)) * 2
+    bb = 0.4
+    if fact <= 1:
+        cr = fact * bb
+        cg = (1 - fact) * (1 - bb) + bb
+        cb = fact
+    else:
+        fact -= 1
+        cr = (fact * (1 - bb)) + bb
+        cg = (1 - fact) * bb
+        cb = 1 - fact
+    return cr, cg, cb
+
+
+def get_listed_colormap_from_default_cycle(alpha: float = 1.0):
+    """
+    Create a ListedColormap from the default color cycle.
+    Use cmap.colors to get the colors back.
+    """
+    # input is a list of hex colors e.g. ['#1f77b4', ...] length 10
+    new_list = DEFAULT_COLOR_CYCLE
+
+    # convert to rgb, add alpha
+    rgb_list = [mpl_colors.hex2color(a) for a in new_list]
+    rgba_list = [(r, g, b, alpha) for r, g, b in rgb_list]
+
+    cmap_bold = mpl_colors.ListedColormap(rgba_list)
+    return cmap_bold
