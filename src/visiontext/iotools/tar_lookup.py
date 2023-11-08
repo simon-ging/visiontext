@@ -61,6 +61,7 @@ class TarLookup:
             # index the tars
             if is_main_process():
                 os.makedirs(base_path, exist_ok=True)
+                os.makedirs(index_file.parent, exist_ok=True)
                 if sort_tar_files:
                     tar_files_rel = sorted(tar_files_rel)
                 for tar_file_rel in tar_files_rel:
