@@ -24,11 +24,11 @@ https://www.nltk.org/howto/wordnet.html
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Optional
 
 import nltk
 from nltk.corpus import wordnet as wn
 from nltk.corpus.reader import Synset  # noqa
+from typing import Optional
 
 from packg.iotools import dump_json, load_json
 from packg.paths import get_cache_dir
@@ -77,12 +77,13 @@ def wnid_to_synset(wnid):
     return synset
 
 
-def load_wordnet_nouns(use_cache=True):
+def load_wordnet_nouns(use_cache=True, strip_underscore=True):
     """
     Load all noun synsets from wordnet.
 
     Args:
         use_cache: store results in cache for load_wordnet_nouns
+        strip_underscore: remove underscore from lemmas
 
     Returns:
         dictionary of entries like
@@ -109,7 +110,8 @@ def load_wordnet_nouns(use_cache=True):
     if _wordnet_nouns is not None:
         return _wordnet_nouns
     if use_cache:
-        cache_file = get_cache_dir() / "wordnet_nouns.json"
+        addstr = "_stripunderscore" if strip_underscore else ""
+        cache_file = get_cache_dir() / f"wordnet_nouns{addstr}.json"
         if cache_file.is_file():
             _wordnet_nouns = load_json(cache_file)
             return _wordnet_nouns
@@ -129,6 +131,8 @@ def load_wordnet_nouns(use_cache=True):
         lemmas = synset.lemma_names()
         name = synset.name()
         definition = synset.definition()
+        if strip_underscore:
+            lemmas = [l.replace("_", " ") for l in lemmas]
         wordnet_data[wnid] = {
             "parent_wnids": parent_wnids,
             "lemmas": lemmas,
