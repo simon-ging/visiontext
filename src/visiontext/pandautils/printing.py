@@ -21,3 +21,9 @@ def full_pandas_display():
         False,
     ):
         yield
+
+
+@contextmanager
+def pandas_float_format(fmt="{:.2f}"):
+    with pd.option_context("display.float_format", fmt.format):
+        yield
