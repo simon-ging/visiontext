@@ -4,7 +4,7 @@ Check whether GPU is available for PyTorch or TensorFlow.
 Oneliners:
 
 python -c "from tensorflow.python.client import device_lib; print(device_lib.list_local_devices())"
-python -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.device_count());"
+python -c "import torch; print(torch.cuda.is_available()); print(torch.cuda.device_count()); print(torch.version.cuda)"
 
 Torch backends: https://pytorch.org/docs/stable/backends.html
 
