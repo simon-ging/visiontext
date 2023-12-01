@@ -1,0 +1,9 @@
+ipython
+packg
+numpy
+matplotlib
+jupyter
+notebook
+ipdb
+nltk
+pandas
