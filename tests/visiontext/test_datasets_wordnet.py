@@ -1,6 +1,6 @@
 from nltk.corpus.reader import Synset  # noqa
 
-from visiontext.datasets.wordnet import load_wordnet_nouns, wnid_to_synset, synset_to_wnid, display_wnid
+from visiontext.datasets.wordnet import load_wordnet_nouns, wnid_to_synset, synset_to_wnid
 
 
 def test_wordnet():

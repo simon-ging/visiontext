@@ -10,32 +10,31 @@ Torch backends: https://pytorch.org/docs/stable/backends.html
 
 """
 from packg import format_exception
+from visiontext.profiling import GPUProfiler
 
 
 def main():
-    # print(GPUProfiler().profile_to_str())  # todo add gpu profiler and enable this line
-
-    print(f"Check PyTorch GPU availability")
+    print(f"\nCheck PyTorch GPU availability")
     try:
         import torch  # noqa
 
-        print(f"torch.version.__version__={torch.version.__version__}")
-        print(f"torch.version.cuda={torch.version.cuda}")
-        print(f"torch.cuda.is_available()={torch.cuda.is_available()}")
-        print(f"torch.cuda.device_count()={torch.cuda.device_count()}")
-        print(f"torch.backends.cudnn.version()={torch.backends.cudnn.version()}")
+        print(f"    torch.version.__version__={torch.version.__version__}")
+        print(f"    torch.version.cuda={torch.version.cuda}")
+        print(f"    torch.cuda.is_available()={torch.cuda.is_available()}")
+        print(f"    torch.cuda.device_count()={torch.cuda.device_count()}")
+        print(f"    torch.backends.cudnn.version()={torch.backends.cudnn.version()}")
     except Exception as e:
-        print(f"PyTorch failed: {format_exception(e)}")
+        print(f"    PyTorch failed: {format_exception(e)}")
 
-    print(f"Check TensorFlow GPU availability")
+    print(f"\nCheck TensorFlow GPU availability")
     try:
         from tensorflow.python.client import device_lib  # noqa
 
         print(device_lib.list_local_devices())
     except Exception as e:
-        print(f"TensorFlow failed: {format_exception(e)}")
+        print(f"    TensorFlow failed: {format_exception(e)}")
 
-        return
+    print(f"\nGPU Profiler output: {GPUProfiler().profile_to_str()}")
 
 
 if __name__ == "__main__":

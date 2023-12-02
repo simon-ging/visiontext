@@ -32,7 +32,7 @@ from typing import Optional
 
 from packg.iotools import dump_json, load_json
 from packg.paths import get_cache_dir
-from packg.tqdmu import tqdm_max_ncols
+from packg.tqdmext import tqdm_max_ncols
 
 _wordnet_nouns: Optional[dict] = None
 

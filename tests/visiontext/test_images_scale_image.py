@@ -3,8 +3,7 @@
 import pytest
 from PIL import Image
 
-from visiontext.images import PILImageScaler, open_image_scaled
-from visiontext.images.scale_image import SamplingMapPIL
+from visiontext.images import PILImageScaler, open_image_scaled, SamplingMapPIL
 
 
 # Create a function to generate a small sample image and save it to a temporary path
@@ -44,6 +43,7 @@ def test_resampling_methods_pillow_enum_name(sample_image, image_scaler):
         print(f"    Method {method} type {type(method)}")
         result = image_scaler.scale_image(img, 50, 100, method=method)
         assert result.size == (100, 50)
+
 
 def test_resampling_methods_pillow_enum(sample_image, image_scaler):
     print(f"Use enum directly:")

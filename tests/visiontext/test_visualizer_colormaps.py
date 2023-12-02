@@ -1,4 +1,4 @@
-from visiontext.visualizer.colormaps import DEFAULT_COLOR_CYCLE, get_color_from_default_color_cycle
+from visiontext.colormaps import DEFAULT_COLOR_CYCLE, get_color_from_default_color_cycle
 
 
 def test_color_cycles():

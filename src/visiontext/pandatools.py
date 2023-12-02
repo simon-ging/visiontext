@@ -4,8 +4,13 @@ from contextlib import contextmanager
 from loguru import logger
 from pandas.io.formats.style import Styler
 from pathlib import Path
+from typing import Optional
 
-from visiontext.visualizer.colormaps import redgreen_bright
+from visiontext.images import PILImageScaler
+
+from visiontext.colormaps import redgreen_bright
+
+PILImageScaler
 
 
 def create_styler(
@@ -94,3 +99,9 @@ def display_df(
 def pandas_float_format(fmt="{:.2f}"):
     with pd.option_context("display.float_format", fmt.format):
         yield
+
+
+def print_stats(input_data, title: Optional[str] = None):
+    if title is not None:
+        print(title)
+    print(pd.Series(input_data).describe())

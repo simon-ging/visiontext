@@ -7,3 +7,6 @@ notebook
 ipdb
 nltk
 pandas
+pyinstrument
+nvidia-ml-py3  # gpu profiling
+psutil  # ram/cpu profiling

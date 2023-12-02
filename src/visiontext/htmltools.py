@@ -1,4 +1,9 @@
+import base64
+
+import io
+
 from IPython.display import display, HTML
+from PIL import Image
 
 
 class NotebookHTMLPrinter:
@@ -118,3 +123,48 @@ def display_scrollable(html_content, scroll_height=200):
         display(HTML(f"<div style='{css_style}'>{html_content}</div>"))
     else:
         display(HTML(html_content))
+
+
+def get_colored_html_text(color_tuple, *text_args, sep=" ", end="\n"):
+    assert len(color_tuple) in [1, 3, 4] and [
+        0 <= ca <= 255 for ca in color_tuple
+    ], f"Invalid rgb tuple: {color_tuple}"
+    if len(color_tuple) == 1:
+        color_tuple = color_tuple * 3
+    hex_str = "".join([f"{ca:02x}" for ca in color_tuple])
+    args_joined = sep.join(text_args)
+    text = f"<span style='color:#{hex_str};'>{args_joined}</span>{end}"
+    text = text.replace("\n", "<br />")
+    return text
+
+
+def get_colored_html_text_from_lists(c_list, t_list, sep=""):
+    assert len(c_list) == len(  #
+        t_list
+    ), f"got {len(c_list)} colors and {len(t_list)} texts: {c_list}, {t_list}"
+    texts = []
+    for c, t in zip(c_list, t_list):
+        text = get_colored_html_text(c, t, sep="", end="")
+        texts.append(text)
+    full_text = sep.join(texts)
+    return full_text
+
+
+def convert_image_to_html(pil_image: Image.Image) -> str:
+    """
+    Usage:
+        display(HTML(convert_image_to_html(pil_image)))
+
+    Args:
+        pil_image: pillow image object
+
+    Returns:
+        Image as embedded html <img> tag string
+    """
+
+    bio = io.BytesIO()
+    pil_image.save(bio, "png")
+    bios = bio.getbuffer()
+    biosb64 = str(base64.b64encode(bios), "ascii")
+    html_str = f'<img src="data:image/png;base64,{biosb64}"/>'
+    return html_str

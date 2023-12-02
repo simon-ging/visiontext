@@ -50,7 +50,7 @@ from packg.magic import reload_recursive
 from packg.paths import get_anno_dir, get_cache_dir, get_result_dir, get_data_dir, get_code_dir
 from packg.strings import b64_encode_from_bytes
 from visiontext.images import PILImageScaler
-from visiontext.notebookutils import NotebookHTMLPrinter, display_html_table
+from visiontext.htmltools import NotebookHTMLPrinter, display_html_table
 
 # # the __all__ list below is used to stop pycharm or other tools from removing unused imports
 # # to update it after changing the imports above, uncomment the code below and copypaste the output

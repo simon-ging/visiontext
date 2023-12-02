@@ -27,6 +27,17 @@ rbg_bright = mpl_colors.LinearSegmentedColormap.from_list(
     ],
 )
 
+rbg_dark = mpl_colors.LinearSegmentedColormap.from_list(
+    "rbg",
+    [
+        [0.5, 0, 0],
+        [0.3, 0.3, 0],
+        [0.0, 0.0, 0.0],
+        [0.0, 0.3, 0.3],
+        [0.0, 0.3, 0.0],
+    ],
+)
+
 
 DEFAULT_COLOR_CYCLE = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
@@ -82,7 +93,7 @@ def create_colormap_for_dark_background(
         inverted: if True, invert the colormap (gives dark colors for bright background)
         scale: downscale the colormap (make it darker, 1.0 = no scaling)
         alpha: transparency value for all colors, 1.0 = opaque, 0.0 = transparent / invisible
-        add_brightness: add this value to all RGB values (0.0 = no change, 1.0 = colors are white)
+        add_brightness: add this to all RGB values (0.0 = no change, 1.0 = all colors are white)
 
     Returns:
         colormap
@@ -109,29 +120,8 @@ def create_colormap_for_dark_background(
     return ccmap
 
 
-def get_colored_html_text(color_tuple, *text_args, sep=" ", end="\n"):
-    assert len(color_tuple) in [1, 3, 4] and [
-        0 <= ca <= 255 for ca in color_tuple
-    ], f"Invalid rgb tuple: {color_tuple}"
-    if len(color_tuple) == 1:
-        color_tuple = color_tuple * 3
-    hex_str = "".join([f"{ca:02x}" for ca in color_tuple])
-    args_joined = sep.join(text_args)
-    text = f"<span style='color:#{hex_str};'>{args_joined}</span>{end}"
-    text = text.replace("\n", "<br />")
-    return text
-
-
-def get_colored_html_text_from_lists(c_list, t_list, sep=""):
-    assert len(c_list) == len(  #
-        t_list
-    ), f"got {len(c_list)} colors and {len(t_list)} texts: {c_list}, {t_list}"
-    texts = []
-    for c, t in zip(c_list, t_list):
-        text = get_colored_html_text(c, t, sep="", end="")
-        texts.append(text)
-    full_text = sep.join(texts)
-    return full_text
+rainbow_bright = create_colormap_for_dark_background()
+rainbow_dark = create_colormap_for_dark_background(inverted=True)
 
 
 def add_colorbar(fig, fig_imshow, ax):

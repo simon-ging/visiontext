@@ -1,12 +1,8 @@
-from dataclasses import dataclass
-from typing import Union, Optional
-
 import numpy as np
 from PIL import Image
 from PIL.Image import Resampling
-
-from packg import Const
-
+from dataclasses import dataclass
+from typing import Union, Optional
 
 AUTO = "auto"
 DEFAULT_UPSAMPLING_METHOD = Resampling.BICUBIC
@@ -133,3 +129,20 @@ def open_image_scaled(
         raise ValueError(
             f"One of smaller_side={smaller_side} and bigger_side={bigger_side} must be given"
         )
+
+
+def get_properties(image_file):
+    """
+    Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html
+
+    Args:
+        image_file:
+
+    Returns:
+
+    """
+    image = Image.open(image_file)
+    mode = image.mode  # L (grayscale), RGB, RGBA
+    assert mode in ["L", "RGB", "RGBA"], f"Unsupported mode {mode} for {image_file}"
+    width, height = image.size
+    return mode, width, height
