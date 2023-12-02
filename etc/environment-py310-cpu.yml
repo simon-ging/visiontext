@@ -2,7 +2,7 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - defaults::python=3.9
+  - defaults::python=3.10
   - conda-forge::sqlite
   - pytorch::pytorch
   - pytorch::torchvision
