@@ -10,8 +10,6 @@ from visiontext.images import PILImageScaler
 
 from visiontext.colormaps import redgreen_bright
 
-PILImageScaler
-
 
 def create_styler(
     formats=None,
@@ -105,3 +103,5 @@ def print_stats(input_data, title: Optional[str] = None):
     if title is not None:
         print(title)
     print(pd.Series(input_data).describe())
+
+

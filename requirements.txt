@@ -10,3 +10,10 @@ pandas
 pyinstrument
 nvidia-ml-py3  # gpu profiling
 psutil  # ram/cpu profiling
+
+# html / xml
+beautifulsoup4
+lxml
+
+chardet
+spacy

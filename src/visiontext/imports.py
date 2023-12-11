@@ -12,6 +12,7 @@ import hashlib
 import io
 import json
 import numpy as np
+import pandas as pd
 import os
 import random
 import re
@@ -47,16 +48,16 @@ from packg import format_exception
 from packg.iotools.jsonext import load_json, dump_json, loads_json, dumps_json
 from packg.log import configure_logger
 from packg.magic import reload_recursive
-from packg.paths import get_anno_dir, get_cache_dir, get_result_dir, get_data_dir, get_code_dir
+from packg.paths import get_cache_dir, get_data_dir, get_code_dir
 from packg.strings import b64_encode_from_bytes
-from visiontext.images import PILImageScaler
 from visiontext.htmltools import NotebookHTMLPrinter, display_html_table
+from visiontext.images import PILImageScaler, open_image_scaled
+from visiontext.pandatools import full_pandas_display
+from typedparser.objects import invert_dictionary, flatten_dict
 
-# # the __all__ list below is used to stop pycharm or other tools from removing unused imports
-# # to update it after changing the imports above, uncomment the code below and copypaste the output
-# imported_modules = [m for m in globals().keys() if not m.startswith("_")]
-#
-# print(f"__all__ = {repr(sorted(imported_modules))}")
+# the __all__ list below is used to stop pycharm or other tools from removing unused imports
+# to update it after changing the imports above, uncomment the code below and copypaste the output
+# python -c "from visiontext.imports import *; im = [m for m in globals().keys() if not m.startswith(\"_\")]; print(f\"__all__ = {repr(sorted(im))}\")"
 
 __all__ = [
     "Any",
@@ -88,11 +89,9 @@ __all__ = [
     "dump_json",
     "dumps_json",
     "format_exception",
-    "get_anno_dir",
     "get_cache_dir",
     "get_code_dir",
     "get_data_dir",
-    "get_result_dir",
     "hashlib",
     "io",
     "json",
@@ -101,6 +100,7 @@ __all__ = [
     "logger",
     "np",
     "os",
+    "pd",
     "pformat",
     "plt",
     "pprint",
@@ -112,4 +112,8 @@ __all__ = [
     "time",
     "timer",
     "tqdm",
+    "invert_dictionary",
+    "flatten_dict",
+    "full_pandas_display",
+    "open_image_scaled",
 ]

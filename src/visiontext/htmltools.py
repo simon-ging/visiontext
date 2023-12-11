@@ -1,9 +1,12 @@
+from io import BytesIO
+
 import base64
 
 import io
 
 from IPython.display import display, HTML
 from PIL import Image
+from matplotlib import pyplot as plt
 
 
 class NotebookHTMLPrinter:
@@ -161,10 +164,27 @@ def convert_image_to_html(pil_image: Image.Image) -> str:
     Returns:
         Image as embedded html <img> tag string
     """
-
     bio = io.BytesIO()
     pil_image.save(bio, "png")
     bios = bio.getbuffer()
     biosb64 = str(base64.b64encode(bios), "ascii")
     html_str = f'<img src="data:image/png;base64,{biosb64}"/>'
     return html_str
+
+
+def convert_figure_to_base64(fig=plt):
+    # todo test this if fig is actually not plt
+    img = BytesIO()
+    fig.savefig(img, format="png")
+    img.seek(0)
+    plot_url = base64.b64encode(img.getvalue()).decode()
+    fig.close()  # Close the plot so that it won't be displayed immediately
+    return plot_url
+
+
+def convert_base64_img_to_tag(base64_img):
+    return f'<img src="data:image/png;base64,{base64_img}" />'
+
+
+def convert_figure_to_html_tag(fig=plt):
+    return convert_base64_img_to_tag(convert_figure_to_base64(fig=fig))

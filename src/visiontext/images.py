@@ -1,3 +1,9 @@
+"""
+Examples:
+    >>> from IPython.display import display
+    >>> image = open_image_scaled("image.png", bigger_side=500)
+    >>> display(image)
+"""
 import numpy as np
 from PIL import Image
 from PIL.Image import Resampling

@@ -10,7 +10,7 @@ Torch backends: https://pytorch.org/docs/stable/backends.html
 
 """
 from packg import format_exception
-from visiontext.profiling import GPUProfiler
+from visiontext.profiling import get_gpu_profiler, GPUProfilerTorch
 
 
 def main():
@@ -23,6 +23,9 @@ def main():
         print(f"    torch.cuda.is_available()={torch.cuda.is_available()}")
         print(f"    torch.cuda.device_count()={torch.cuda.device_count()}")
         print(f"    torch.backends.cudnn.version()={torch.backends.cudnn.version()}")
+        example_tensor = torch.zeros(128, 1024, 768).cuda()
+        print(f"    example_tensor.shape={example_tensor.shape}")
+
     except Exception as e:
         print(f"    PyTorch failed: {format_exception(e)}")
 
@@ -34,7 +37,9 @@ def main():
     except Exception as e:
         print(f"    TensorFlow failed: {format_exception(e)}")
 
-    print(f"\nGPU Profiler output: {GPUProfiler().profile_to_str()}")
+    profiler = get_gpu_profiler()
+    print(profiler)
+    print(f"\nGPU Profiler output: {profiler.profile_to_str()}")
 
 
 if __name__ == "__main__":
