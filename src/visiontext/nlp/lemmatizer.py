@@ -9,7 +9,7 @@ from packg.strings import quote_with_urlparse
 from loguru import logger
 from spacy import Language
 from packg.paths import get_data_dir
-from visiontext.spacytools import load_spacy_model, SPACY_DEFAULT_EN
+from visiontext.spacytools import maybe_download_spacy_model, SPACY_DEFAULT_EN
 
 
 class LemmatizerInterface:
@@ -35,7 +35,7 @@ class LemmatizerSpacy(LemmatizerInterface):
     @property
     def lemmatizer(self):
         if self._lemmatizer is None:
-            self._lemmatizer = load_spacy_model(self.name)
+            self._lemmatizer = maybe_download_spacy_model(self.name)
         return self._lemmatizer
 
     def lemmatize(self, in_str: str) -> List[str]:

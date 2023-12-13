@@ -13,8 +13,6 @@ import nltk
 from nltk.data import load
 from nltk.tokenize.destructive import NLTKWordTokenizer
 
-from typedparser.objects import compare_nested_objects
-
 
 def ensure_setup_nltk(language="english"):
     try:
@@ -75,7 +73,10 @@ def apply_nltk_tokenizer(tokenizer, text: str) -> list[tuple[str, str]]:
         word1 + connector1 + word2 + connector2 + ... = text
 
     """
-    starts, stops = (list(a) for a in zip(*list(tokenizer.span_tokenize(text))))
+    tokenizer_output = list(tokenizer.span_tokenize(text))
+    if len(tokenizer_output) == 0:
+        return []
+    starts, stops = (list(a) for a in zip(*tokenizer_output))
     starts.append(len(text))
 
     output = []
@@ -105,6 +106,8 @@ def main():
     print(sentences_and_connectors)
     reconstruct = "".join(itertools.chain(*sentences_and_connectors))
     print(reconstruct == inp)
+
+    # todo add tests, also test things like "" and "\n" as they can break things
 
 
 if __name__ == "__main__":

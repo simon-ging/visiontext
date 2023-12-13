@@ -5,7 +5,7 @@ SPACY_DEFAULT_EN = "en_core_web_sm"
 SPACY_DEFAULT_DE = "de_core_news_lg"
 
 
-def load_spacy_model(model=SPACY_DEFAULT_EN):
+def maybe_download_spacy_model(model=SPACY_DEFAULT_EN):
     try:
         nlp = spacy.load(model)
     except OSError:
@@ -20,6 +20,6 @@ loaded_spacy_models = {}
 def get_or_load_spacy_model(model=SPACY_DEFAULT_EN):
     if model in loaded_spacy_models:
         return loaded_spacy_models[model]
-    nlp = load_spacy_model(model)
+    nlp = maybe_download_spacy_model(model)
     loaded_spacy_models[model] = nlp
     return nlp

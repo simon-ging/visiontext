@@ -19,6 +19,8 @@ import re
 import shutil
 import sys
 import time
+import pickle
+
 from IPython.display import Image, display, HTML
 from PIL import Image
 from copy import deepcopy
@@ -50,10 +52,11 @@ from packg.log import configure_logger
 from packg.magic import reload_recursive
 from packg.paths import get_cache_dir, get_data_dir, get_code_dir
 from packg.strings import b64_encode_from_bytes
+from packg.tqdmext import tqdm_max_ncols
 from visiontext.htmltools import NotebookHTMLPrinter, display_html_table
 from visiontext.images import PILImageScaler, open_image_scaled
 from visiontext.pandatools import full_pandas_display
-from typedparser.objects import invert_dictionary, flatten_dict
+from typedparser.objects import invert_dict_of_dict, flatten_dict
 
 # the __all__ list below is used to stop pycharm or other tools from removing unused imports
 # to update it after changing the imports above, uncomment the code below and copypaste the output
@@ -112,8 +115,10 @@ __all__ = [
     "time",
     "timer",
     "tqdm",
-    "invert_dictionary",
+    "invert_dict_of_dict",
     "flatten_dict",
     "full_pandas_display",
     "open_image_scaled",
+    "tqdm_max_ncols",
+    "pickle",
 ]
