@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 import numpy as np
+import torch
+
+from packg import Const
 
 
-def feat_to_uint8(
+class NormsC(Const):
+    LINEAR = "linear"
+
+
+def compress_fp32_to_uint8_numpy(
     feat: np.ndarray, axis: int = -1, norm: str = "linear"
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -21,8 +28,7 @@ def feat_to_uint8(
             except the reduction axis has length 1.
         maxs: See mins
     """
-    if norm == "linear":
-        # linear scaling
+    if norm == NormsC.LINEAR:
         mins = np.min(feat, axis=axis, keepdims=True)
         maxs = np.max(feat, axis=axis, keepdims=True)
         # safeguard against div by zero
@@ -30,23 +36,43 @@ def feat_to_uint8(
         maxs[problem_idx] = mins[problem_idx] + 1e-8
         feat_uint8 = np.round((feat - mins) * 255 / (maxs - mins)).astype(np.uint8)
         return feat_uint8, mins, maxs
-    if norm == "exp":
-        # exponential scaling
-        mins = np.min(feat, axis=axis, keepdims=True)
-        term = np.log2(feat - mins + 1)
-        maxs = np.max(term)
-        feat_uint8 = np.round((term / maxs) * 255).astype(np.uint8)
-        return feat_uint8, mins, maxs
-    raise ValueError(f"Unknown norm {norm}")
+    raise ValueError(f"Unknown norm '{norm}', possible values {list(NormsC.values())}")
 
 
-def uint8_to_feat(
+def decompress_uint8_to_fp32_numpy(
     feat_uint8: np.ndarray, mins: np.ndarray, maxs: np.ndarray, norm: str = "linear"
 ) -> np.ndarray:
-    """Undo the compression from feat_to_uint8."""
-    if norm == "linear":
+    """
+    Undo the compression from compress_fp32_to_uint8_numpy
+    """
+    if norm == NormsC.LINEAR:
         return feat_uint8.astype(np.float32) / 255.0 * (maxs - mins) + mins
-    if norm == "exp":
-        # exponential
-        return (mins - 1 + 2 ** (feat_uint8 * maxs / 255)).astype(np.float32)
-    raise ValueError(f"Unknown norm {norm}")
+    raise ValueError(f"Unknown norm '{norm}', possible values {list(NormsC.values())}")
+
+
+def compress_fp32_to_uint8_torch(
+    feat: torch.Tensor, axis: int = -1, norm: str = "linear"
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """
+    See compress_fp32_to_uint8_numpy
+    """
+    if norm == NormsC.LINEAR:
+        mins, _mins_idx = torch.min(feat, dim=axis, keepdim=True)
+        maxs, _maxs_idx = torch.max(feat, dim=axis, keepdim=True)
+        # safeguard against div by zero
+        problem_idx = torch.where((maxs - mins) ** 2 < 1e-16)
+        maxs[problem_idx] = mins[problem_idx] + 1e-8
+        feat_uint8 = torch.round((feat - mins) * 255 / (maxs - mins)).to(torch.uint8)
+        return feat_uint8, mins, maxs
+    raise ValueError(f"Unknown norm '{norm}', possible values {list(NormsC.values())}")
+
+
+def decompress_uint8_to_fp32_torch(
+    feat_uint8: torch.Tensor, mins: torch.Tensor, maxs: torch.Tensor, norm: str = "linear"
+) -> torch.Tensor:
+    """
+    Undo the compression from compress_fp32_to_uint8_torch
+    """
+    if norm == NormsC.LINEAR:
+        return feat_uint8.float() / 255.0 * (maxs - mins) + mins
+    raise ValueError(f"Unknown norm '{norm}', possible values {list(NormsC.values())}")

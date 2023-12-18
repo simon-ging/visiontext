@@ -26,7 +26,14 @@ def tokenize_sentences_and_connectors(text: str, language="english") -> list[tup
     return apply_nltk_tokenizer(tokenizer, text)
 
 
-_treebank_word_tokenizer = NLTKWordTokenizer()
+_treebank_word_tokenizer = None
+
+
+def get_treebank_word_tokenizer():
+    global _treebank_word_tokenizer
+    if _treebank_word_tokenizer is None:
+        _treebank_word_tokenizer = NLTKWordTokenizer()
+    return _treebank_word_tokenizer
 
 
 def tokenize_words_and_connectors(
@@ -45,12 +52,13 @@ def tokenize_words_and_connectors(
         list of tuples (word, connector) that can reconstruct the original text:
             word1 + connector1 + word2 + connector2 + ... = text
     """
+
     sentences_and_connectors = (
         [(text, "")] if not split_eos else tokenize_sentences_and_connectors(text, language)
     )
     words_and_connectors = []
     for sentence, sentence_connector in sentences_and_connectors:
-        words_conns_here = apply_nltk_tokenizer(_treebank_word_tokenizer, sentence)
+        words_conns_here = apply_nltk_tokenizer(get_treebank_word_tokenizer(), sentence)
         for iw, (word, connector) in enumerate(words_conns_here):
             if iw == len(words_conns_here) - 1:
                 connector = f"{connector}{sentence_connector}"

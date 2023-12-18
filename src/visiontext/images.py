@@ -72,6 +72,24 @@ class PILImageScaler:
         img = img.resize((target_w, target_h), method)
         return self._prepare_return(img)
 
+    def crop_square(self, img: ImageType):
+        img = self._ensure_pil(img)
+        w, h = img.size
+        if w == h:
+            return img
+        if w > h:
+            left = (w - h) // 2
+            right = left + h
+            top = 0
+            bottom = h
+        else:
+            top = (h - w) // 2
+            bottom = top + w
+            left = 0
+            right = w
+        img = img.crop((left, top, right, bottom))
+        return self._prepare_return(img)
+
     def _ensure_pil(self, img: ImageType):
         if isinstance(img, Image.Image):
             return img
@@ -100,6 +118,9 @@ class PILImageScaler:
             img = img.astype(np.float32) / 255.0
             img = np.clip(img, 0.0, 1.0)
         return img
+
+
+pil_editor = PILImageScaler(return_pillow=True)
 
 
 def _is_downsampling(h, w, target_h, target_w):
