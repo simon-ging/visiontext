@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 RE_ALNUM = re.compile(r"[^a-zA-Z0-9 ]+")

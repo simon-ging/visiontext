@@ -7,6 +7,8 @@ here the space information is preserved and the functions outputs list of tuples
 which can be used to reconstruct the original text input.
 
 """
+from __future__ import annotations
+
 import itertools
 
 import nltk

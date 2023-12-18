@@ -1,22 +1,23 @@
-import datetime
-import os
-from pathlib import Path
-from typing import List, Optional
+from __future__ import annotations
 
+import datetime
 import h5py
+import os
 from attr import define, field
-from packg.strings import quote_with_urlparse
 from loguru import logger
+from pathlib import Path
 from spacy import Language
+
 from packg.paths import get_data_dir
+from packg.strings import quote_with_urlparse
 from visiontext.spacytools import maybe_download_spacy_model, SPACY_DEFAULT_EN
 
 
 class LemmatizerInterface:
-    def lemmatize(self, in_str: str) -> List[str]:
+    def lemmatize(self, in_str: str) -> list[str]:
         raise NotImplementedError
 
-    def batch_lemmatize(self, sentences: List[str]) -> List[List[str]]:
+    def batch_lemmatize(self, sentences: list[str]) -> list[list[str]]:
         raise NotImplementedError
 
     def get_unique_name(self) -> str:
@@ -26,7 +27,7 @@ class LemmatizerInterface:
 @define(slots=False)
 class LemmatizerSpacy(LemmatizerInterface):
     name: str = SPACY_DEFAULT_EN
-    _lemmatizer: Optional[Language] = field(init=False, repr=False, default=None)
+    _lemmatizer: Language | None = field(init=False, repr=False, default=None)
     verbose: bool = False
 
     def get_unique_name(self) -> str:
@@ -38,7 +39,7 @@ class LemmatizerSpacy(LemmatizerInterface):
             self._lemmatizer = maybe_download_spacy_model(self.name)
         return self._lemmatizer
 
-    def lemmatize(self, in_str: str) -> List[str]:
+    def lemmatize(self, in_str: str) -> list[str]:
         doc = self.lemmatizer(in_str)
         words_out = []
         for token in doc:
@@ -48,7 +49,7 @@ class LemmatizerSpacy(LemmatizerInterface):
                 words_out.append(token.text)
         return words_out
 
-    def batch_lemmatize(self, sentences: List[str]) -> List[List[str]]:
+    def batch_lemmatize(self, sentences: list[str]) -> list[list[str]]:
         sentences_set = set(sentences)
         missing_sentences = sentences_set
         if self.verbose:
@@ -82,10 +83,10 @@ class LemmatizerDbWrapper(LemmatizerInterface):
             else self.h5_file
         )
 
-    def lemmatize(self, in_str: str) -> List[str]:
+    def lemmatize(self, in_str: str) -> list[str]:
         return self.batch_lemmatize([in_str])[0]
 
-    def batch_lemmatize(self, sentences: List[str]) -> List[List[str]]:
+    def batch_lemmatize(self, sentences: list[str]) -> list[list[str]]:
         missing_sentences_set = set(sentences)
 
         output_dict = {}
