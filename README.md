@@ -1,8 +1,8 @@
 # visiontext
 
 <p align="center">
-<a href="https://github.com/gingsi/visiontext/actions/workflows/build-py37-cpu.yml">
-  <img alt="build 3.7 status" title="build 3.7 status" src="https://img.shields.io/github/actions/workflow/status/gingsi/visiontext/build-py37-cpu.yml?branch=main&label=build%203.7%20cpu" />
+<a href="https://github.com/gingsi/visiontext/actions/workflows/build-py38-cpu.yml">
+  <img alt="build 3.8 status" title="build 3.8 status" src="https://img.shields.io/github/actions/workflow/status/gingsi/visiontext/build-py38-cpu.yml?branch=main&label=build%203.8%20cpu" />
 </a>
 <a href="https://github.com/gingsi/visiontext/actions/workflows/build-py310-cpu.yml">
   <img alt="build 3.10 status" title="build 3.10 status" src="https://img.shields.io/github/actions/workflow/status/gingsi/visiontext/build-py310-cpu.yml?branch=main&label=build%203.10%20cpu" />
@@ -23,7 +23,7 @@ Utilities for deep learning on multimodal data.
 
 ## Install
 
-Requires `python>=3.7` `pytorch` `sqlite`
+Requires `python>=3.8` `pytorch` `sqlite`
 
 ```bash
 pip install visiontext
@@ -42,3 +42,7 @@ python -m pytest --cov
 pylint visiontext
 pylint tests
 ~~~
+
+## Changelog
+
+- 0.8.1: Set minimum python version to 3.8 since PyTorch requires it

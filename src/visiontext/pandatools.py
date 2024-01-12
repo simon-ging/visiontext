@@ -103,5 +103,3 @@ def print_stats(input_data, title: Optional[str] = None):
     if title is not None:
         print(title)
     print(pd.Series(input_data).describe())
-
-

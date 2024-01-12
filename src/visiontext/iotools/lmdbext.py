@@ -8,6 +8,7 @@ from packg.paths import get_cache_dir
 from packg.strings import hash_object
 from packg.typext import PathType
 
+
 class LmdbAutoGrowEnvironment(lmdb.Environment):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

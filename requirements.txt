@@ -12,9 +12,11 @@ nvidia-ml-py3  # gpu profiling
 psutil  # ram/cpu profiling
 h5py
 
-# html / xml
-beautifulsoup4
-lxml
+# # html / xml
+# beautifulsoup4
+# lxml
 
 chardet
 spacy
+lmdb
+msgpack

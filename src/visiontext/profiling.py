@@ -8,5 +8,3 @@ from pyinstrument import Profiler
 from typing import Optional, List
 
 from packg import format_exception
-
-

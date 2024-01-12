@@ -49,7 +49,7 @@ from typing import (
     Sequence,
     Collection,
 )
-
+from natsort import natsorted
 from packg import format_exception
 from packg.iotools.jsonext import load_json, dump_json, loads_json, dumps_json
 from packg.log import configure_logger
@@ -128,4 +128,5 @@ __all__ = [
     "tqdm_max_ncols",
     "JSON",
     "preprocess_text_simple",
+    "natsorted",
 ]

@@ -27,4 +27,3 @@ def stop_pyinstrument_profiler(
     if open_in_browser:
         current_profiler.open_in_browser()
     return text
-
