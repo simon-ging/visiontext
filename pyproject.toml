@@ -7,7 +7,7 @@ name = "visiontext"
 description = "Utilities for deep learning on multimodal data."
 readme = "README.md"
 authors = [{ "name" = "gingsi" }]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = { text = "Apache-2.0" }
 keywords = ["python", "jupyter", "notebook", "lab", "ipython", "html", "pandas", "matplotlib",
     "pytorch", "numpy", ]
@@ -16,7 +16,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
