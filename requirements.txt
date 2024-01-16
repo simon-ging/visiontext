@@ -2,6 +2,7 @@ ipython
 packg
 numpy
 matplotlib
+seaborn
 jupyter
 notebook
 ipdb
