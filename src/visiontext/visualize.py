@@ -1,8 +1,8 @@
 import torch
 from typing import Optional
 
-from ovqa.torchutils import stable_softmax
 from visiontext.htmltools import NotebookHTMLPrinter
+from visiontext.mathutils import torch_stable_softmax
 
 
 def show_classification_logits_as_html(
@@ -53,7 +53,7 @@ def build_classification_logits_table(
     assert not (
         true_classname is not None and true_classid is not None
     ), "Cannot specify both true_classname and true_classid"
-    logits_sm = stable_softmax(logits, temp=temp)
+    logits_sm = torch_stable_softmax(logits, temp=temp)
     # values, indices = torch.topk(logits_sm, k, dim=0)
     values, indices = torch.topk(logits_sm, len(classnames), dim=0)
     logits_sm_np = logits_sm.cpu().numpy()
