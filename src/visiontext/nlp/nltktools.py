@@ -116,7 +116,6 @@ def main():
     print(sentences_and_connectors)
     reconstruct = "".join(itertools.chain(*sentences_and_connectors))
     print(reconstruct == inp)
-
     # todo add tests, also test things like "" and "\n" as they can break things
 
 

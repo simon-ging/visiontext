@@ -10,7 +10,7 @@ from spacy import Language
 
 from packg.paths import get_data_dir
 from packg.strings import quote_with_urlparse
-from visiontext.spacytools import maybe_download_spacy_model, SPACY_DEFAULT_EN
+from visiontext.nlp.spacytools import maybe_download_spacy_model, SPACY_DEFAULT_EN
 
 
 class LemmatizerInterface:

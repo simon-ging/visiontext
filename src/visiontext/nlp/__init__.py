@@ -5,6 +5,6 @@ from .nltktools import (
     apply_nltk_tokenizer,
     ensure_setup_nltk,
 )
-
-
 from .regextools import preprocess_text_simple
+from .spacytools import maybe_download_spacy_model, get_or_maybe_download_spacy_model
+from .lemmatizer import get_lemmatizer

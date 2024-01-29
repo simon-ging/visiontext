@@ -17,7 +17,7 @@ def maybe_download_spacy_model(model=SPACY_DEFAULT_EN):
 loaded_spacy_models = {}
 
 
-def get_or_load_spacy_model(model=SPACY_DEFAULT_EN):
+def get_or_maybe_download_spacy_model(model=SPACY_DEFAULT_EN):
     if model in loaded_spacy_models:
         return loaded_spacy_models[model]
     nlp = maybe_download_spacy_model(model)
