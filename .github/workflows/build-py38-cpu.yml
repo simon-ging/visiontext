@@ -28,15 +28,15 @@ jobs:
     steps:
 #
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 #
     - name: Setup conda
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         activate-environment: ${{ env.W_ENV_NAME }}
-        auto-update-conda: false  # true  # updating or using "latest" is alot slower
-        auto-activate-base: false
-        use-only-tar-bz2: true  # needed for caching to work properly according to conda-incubator
+        miniforge-variant: Mambaforge
+        miniforge-version: latest
+        use-mamba: true
 #
     - name: Collect information
       id: collect-info
@@ -55,7 +55,7 @@ jobs:
         cat $GITHUB_OUTPUT
 #
     - name: Check if pip should update
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       timeout-minutes: 1
       continue-on-error: true
       with:
@@ -68,7 +68,7 @@ jobs:
       id: cache-pipdummy-restore
 #
     - name: Save that pip will update
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       timeout-minutes: 1
       continue-on-error: true
       with:
@@ -78,7 +78,7 @@ jobs:
       if: steps.cache-pipdummy-restore.outputs.cache-hit != 'true'
 #
     - name: Restore cache for conda env  # cannot see $CONDA here so use output from previous step
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       timeout-minutes: ${{ fromJSON(env.W_CACHE_KILL) }}  # fromJSON is required to convert to int
       continue-on-error: true
       with:
@@ -95,7 +95,7 @@ jobs:
 #
     - name: Conda install packages
       run: |
-        conda env update -q -f ${{ env.W_REQ_CONDA }}
+        mamba env update -q -n ${{ env.W_ENV_NAME }} -f ${{ env.W_REQ_CONDA }}
       if: steps.cache-conda-restore.outputs.cache-matched-key == ''
       id: conda-install
 #
@@ -116,7 +116,7 @@ jobs:
       run: pip list
 #
     - name: Save cache for conda env
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       timeout-minutes: ${{ fromJSON(env.W_CACHE_KILL) }}  # fromJSON is required to convert to int
       continue-on-error: true
       with:
