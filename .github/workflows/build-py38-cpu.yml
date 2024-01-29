@@ -19,10 +19,10 @@ jobs:
       run:
         shell: bash -el {0}  # required otherwise conda will not be activated for "run" steps
     env:
-      W_ENV_NAME: env-py38
+      W_ENV_NAME: buildenv
       W_REQ_CONDA: etc/environment-py38-cpu.yml
       W_REQ_PIP: requirements.txt
-      W_CACHE_NUMBER: 0  # increase to reset cache
+      W_CACHE_NUMBER: 1  # increase to reset cache
       SEGMENT_DOWNLOAD_TIMEOUT_MINS: 2  # stuck cache download should stop after X minutes
       W_CACHE_KILL: 3  # hard kill a stuck cache download after X minutes
     steps:
