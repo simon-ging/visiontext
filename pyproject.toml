@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "visiontext"
 description = "Utilities for deep learning on multimodal data."
 readme = "README.md"
-authors = [{ "name" = "simonging" }]
+authors = [{ "name" = "simon-ging" }]
 requires-python = ">=3.8"
 license = { text = "Apache-2.0" }
 keywords = ["python", "jupyter", "notebook", "lab", "ipython", "html", "pandas", "matplotlib",
@@ -26,7 +26,7 @@ classifiers = [
 dynamic = ["version", "dependencies"]
 
 [project.urls]
-Project-URL = "https://github.com/simonging/visiontext"
+Project-URL = "https://github.com/simon-ging/visiontext"
 
 [tool.setuptools]
 zip-safe = true
