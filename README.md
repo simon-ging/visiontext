@@ -48,4 +48,5 @@ pylint tests
 
 ## Changelog
 
+- 0.10.1: Test with python 3.12
 - 0.8.1: Set minimum python version to 3.8 since PyTorch requires it
