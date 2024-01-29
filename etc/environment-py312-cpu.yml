@@ -1,6 +1,7 @@
 channels:
   - defaults
   - conda-forge
+  - pytorch
 dependencies:
   - defaults::python=3.12
   - conda-forge::sqlite
