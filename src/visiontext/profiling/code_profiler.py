@@ -1,4 +1,3 @@
-import psutil
 from loguru import logger
 from pyinstrument import Profiler
 
