@@ -135,7 +135,3 @@ def test_jpeg_coding():
             err = _image_delta(img_rgb, img_rgb_re)
             print(f"E={err:.1e}")
             # img_rgb_re_as_gray = decode_jpeg(bytes_rgb, is_gray=True)
-
-
-if __name__ == "__main__":
-    test_jpeg_coding()

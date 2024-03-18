@@ -222,37 +222,40 @@ def encode_jpeg(
             encoded_arr = cv2.imencode(".jpg", np_arr_bgr, params=params)[1]
         # creates np.ndarray with shape (num_bytes) dtype uint8
         return encoded_arr.tobytes()
-    if method == JPEGDecoderConst.LIBTURBOJPEG_DEFAULT:
-        np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
-        encoded_arr = _jpeg_getter.get().encode(np_arr_bgr, quality=quality, **tjpeg_kwargs)
-        return encoded_arr
-
     if method == JPEGDecoderConst.PILLOW:
         mode = "L" if is_gray else "RGB"
         bio = io.BytesIO()
         # noinspection PyTypeChecker
         Image.fromarray(np_arr, mode).save(bio, format="JPEG", quality=quality)
         return bio.getvalue()
-
-    tjpeg_kwargs = {
-        "pixel_format": tjpeg.TJPF_GRAY if is_gray else tjpeg.TJPF_BGR,
-        "jpeg_subsample": tjpeg.TJSAMP_GRAY if is_gray else tjpeg.TJSAMP_422,
-    }
     if method == JPEGDecoderConst.PILLOW_IMAGE:
         bio = io.BytesIO()
         # noinspection PyTypeChecker
         np_arr.save(bio, format="JPEG", quality=quality)
         return bio.getvalue()
+    if method == JPEGDecoderConst.LIBTURBOJPEG_DEFAULT:
+        np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
+        encoded_arr = _jpeg_getter.get().encode(
+            np_arr_bgr, quality=quality, **_get_tjpeg_kwargs(is_gray)
+        )
+        return encoded_arr
     if method == JPEGDecoderConst.LIBTURBOJPEG_FASTEST:
         np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
         encoded_arr = _jpeg_getter.get().encode(
             np_arr_bgr,
             quality=quality,
             flags=tjpeg.TJFLAG_FASTUPSAMPLE | tjpeg.TJFLAG_FASTDCT,
-            **tjpeg_kwargs,
+            **_get_tjpeg_kwargs(is_gray),
         )
         return encoded_arr
     raise ValueError(f"Unknown JPEG encoding method {method}")
+
+
+def _get_tjpeg_kwargs(is_gray: bool) -> dict[str, int]:
+    return {
+        "pixel_format": tjpeg.TJPF_GRAY if is_gray else tjpeg.TJPF_BGR,
+        "jpeg_subsample": tjpeg.TJSAMP_GRAY if is_gray else tjpeg.TJSAMP_422,
+    }
 
 
 @dataclass
