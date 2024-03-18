@@ -32,18 +32,32 @@ Requires `python>=3.8` `pytorch` `sqlite`
 pip install visiontext
 ```
 
+### Full build
+
+Additionally requires `libjpeg-turbo`:
+
+```bash
+pip install visiontext[full]
+```
+
+
 ## Dev install
 
 Clone repository and cd into, then:
 
 ~~~bash
-pip install -e .
-pip install pytest pytest-cov pylint
-
-python -m pytest --cov
-
+pip install pytest pytest-cov pylint black[jupyter]
 pylint visiontext
 pylint tests
+
+# full build
+pip install -e .[full]
+python -m pytest --cov
+
+# minimal build
+pip install -e .
+python -m pytest --cov -m "not full"
+
 ~~~
 
 ## Changelog
