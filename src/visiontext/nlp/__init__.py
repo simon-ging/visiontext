@@ -1,4 +1,3 @@
-from .lemmatizer import get_lemmatizer
 from .nltktools import (
     rebuild_from_words_and_connectors,
     tokenize_words_and_connectors,

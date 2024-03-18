@@ -24,7 +24,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Version Control :: Git"
 ]
-dynamic = ["version", "dependencies"]
+dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [project.urls]
 Project-URL = "https://github.com/simon-ging/visiontext"
@@ -38,12 +38,19 @@ include-package-data = false
 version = { attr = "visiontext.__version__" }
 dependencies = { file = ["requirements.txt"] }
 
+[tool.setuptools.dynamic.optional-dependencies]
+full = { file = ["optional-requirements.txt"] }
+
 [tool.black]
 line-length = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["slow"]
+markers = [
+    "slow: mark tests as slow (deselect with '-m \"not slow\"')",
+    "local: mark tests as local, i.e. not to be run on CI e.g. because they need a GPU.",
+    "full: mark tests to require the full requirements from pip install package[full]",
+]
 
 [tool.coverage.run]
 source_pkgs = ["visiontext"]

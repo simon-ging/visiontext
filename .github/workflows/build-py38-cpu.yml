@@ -133,7 +133,7 @@ jobs:
 #
     - name: Run pytest
       run: |
-        python -m pytest --cov
+        python -m pytest --cov -m "not full"
 #
     - name: Run pylint
       continue-on-error: true

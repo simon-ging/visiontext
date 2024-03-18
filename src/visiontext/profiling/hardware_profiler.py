@@ -1,10 +1,11 @@
-import nvidia_smi
 import os
+from typing import Optional, List
+
+import nvidia_smi
 import psutil
 import pynvml
 import torch
 from loguru import logger
-from typing import Optional, List
 
 from packg import format_exception
 
@@ -19,6 +20,11 @@ def profile_ram():
     ram_total: float = mem.total / 1024**3
     ram_used: float = mem.used / 1024**3
     return ram_total, ram_used
+
+
+def profile_ram_to_str():
+    ram_total, ram_used = profile_ram()
+    return f"RAM {ram_used:.3f}/{ram_total:.3f}GB"
 
 
 def get_gpu_profiler():

@@ -12,6 +12,7 @@ pyinstrument
 nvidia-ml-py3  # gpu profiling
 psutil  # ram/cpu profiling
 h5py
+pillow
 
 # # html / xml
 # beautifulsoup4
