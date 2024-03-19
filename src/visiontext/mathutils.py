@@ -1,3 +1,6 @@
+import math
+from typing import Optional, Union, Tuple, List
+
 import numpy as np
 import torch
 
@@ -101,3 +104,40 @@ def expand_video_segment(
             if num_frames_seg == min_frames_seg:
                 break
     return start_frame_seg, stop_frame_seg, changes
+
+
+def chunked_mean(arr, max_n=10000):
+    ct = 0
+    total = 0.0
+    for n in range(0, len(arr), max_n):
+        n_stop = n + max_n
+        arr_sub = arr[n:n_stop]
+        ct += len(arr_sub)
+        this_sum = np.sum(arr_sub)
+        # print(this_sum)
+        total += this_sum
+    return total / ct
+
+
+def np_softmax(x: np.ndarray, axis: Optional[Union[int, Tuple[int, ...]]] = -1) -> np.ndarray:
+    x_max = np.max(x, axis, keepdims=True)
+    unnormalized = np.exp(x - x_max)
+    return unnormalized / np.sum(unnormalized, axis, keepdims=True)
+
+
+def distribute_evenly(num: int, num_chunks: int) -> List[int]:
+    """Distribute `num` evenly into `num_chunks` parts.
+
+    Args:
+        num: Number to distribute.
+        num_chunks: Number of parts to distribute into.
+
+    Returns:
+        Array of length `num_chunks` with the distribution.
+    """
+    step_size = math.floor(num / num_chunks)
+    per_shard = [step_size] * num_chunks
+    missing = num - sum(per_shard)
+    for i in range(missing):
+        per_shard[i] += 1
+    return per_shard

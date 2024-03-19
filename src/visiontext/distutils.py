@@ -1,3 +1,15 @@
+"""
+Rank: Global rank of the process in the distributed setting.
+Local rank: Rank on this machine
+
+Example:
+            |    Node1  |   Node2    |
+____________| p1 |  p2  |  p3  |  p4 |
+local_rank  | 0  |   1  |  0   |   1 |
+rank        | 0  |   1  |  2   |   4 |
+
+"""
+
 from __future__ import annotations
 
 import multiprocessing
@@ -13,20 +25,25 @@ def get_process_info() -> str:
 def get_world_info() -> tuple[int, int]:
     """
     Return global rank and world size from environment variables. If not set, return 0, 1.
+
     """
-    rank = int(os.environ.get("RANK", 0))
+    return get_rank(), get_world_size()
+
+
+def get_world_size():
     world_size = int(os.environ.get("WORLD_SIZE", 1))
-    return rank, world_size
+    return world_size
 
 
-def get_local_rank():
+def get_rank() -> int:
     """
-    Get local rank from environment variables. If not set, return 0.
+    In some cases LOCAL_RANK is set, but RANK is unset. Use LOCAL_RANK in that case.
     """
-    local_rank = 0
-    if "LOCAL_RANK" in os.environ:
-        local_rank = int(os.environ["LOCAL_RANK"])
-    return local_rank
+    if "RANK" in os.environ:
+        rank = int(os.environ["RANK"])
+    else:
+        rank = int(os.environ.get("LOCAL_RANK", 0))
+    return rank
 
 
 def print_main(*args, **kwargs):

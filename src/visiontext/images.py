@@ -100,6 +100,10 @@ class _TjpegGetter:
 
     def get(self):
         if self.jpeg is None:
+            if tjpeg is None:
+                raise ImportError("turbojpeg not installed. To install, run:\n"
+                                  "conda install -c conda-forge libjpeg-turbo -y\n"
+                                  "pip install -U pyturbojpeg")
             self.jpeg = tjpeg.TurboJPEG()
         return self.jpeg
 

@@ -7,6 +7,7 @@ from timeit import default_timer
 from typing import List, Tuple, Union
 
 from visiontext.iotools.tar_indexer import index_tar
+from visiontext.distutils import is_main_process, barrier_safe
 
 
 class TarLookup:
@@ -33,6 +34,7 @@ class TarLookup:
                 base_path.
             index_file: Absolute path to sqlite index file.
             verbose: Print verbose output.
+            sort_tar_files: Sort tar file input list before indexing.
             worker_id: Worker id to use for file pointers. When using multiprocessing dataloaders,
                 each worker that uses this lookup needs its own file pointer to the tars.
                 In torch use following code to find it:
@@ -48,7 +50,7 @@ class TarLookup:
         if verbose:
             print(f"Creating TarLookup with index {index_file} and base path {base_path}")
 
-        filename_cache_file = Path(index_file.as_posix() + ".filenames.json")
+        filename_cache_file = Path(f"{index_file.as_posix()}.filenames.json")
         if delete_index:
             if verbose:
                 print(f"Deleting {index_file} and {filename_cache_file} if they exist.")
@@ -106,12 +108,8 @@ class TarLookup:
         # with a 2GB index, 1200 tar, 30M files inside those, this select takes ? alot of time
         # therefore it is worth caching
         if not filename_cache_file.is_file():
-            file_names = [
-                data[0]
-                for data in cursor.execute(
-                    "SELECT file_name FROM offset_data ORDER BY file_name ASC"
-                ).fetchall()
-            ]
+            sql = "SELECT file_name FROM offset_data ORDER BY file_name"
+            file_names = [data[0] for data in cursor.execute(sql).fetchall()]
             json.dump(file_names, filename_cache_file.open("w", encoding="utf-8"))
             if verbose:
                 print(f"{default_timer() -t1:7.1f}s: Built index of {len(file_names)} filenames.")
@@ -226,19 +224,3 @@ class TarLookup:
     def __len__(self):
         return self.n_content_files
 
-
-def is_main_process():
-    local_rank = 0
-    if "RANK" in os.environ:
-        local_rank = int(os.environ["RANK"])
-    if "LOCAL_RANK" in os.environ:
-        local_rank = int(os.environ["LOCAL_RANK"])
-    return local_rank == 0
-
-
-def barrier_safe():
-    """Barrier only if in a distributed torch run. Does not fail if torch package is missing."""
-    if ("RANK" in os.environ or "LOCAL_RANK" in os.environ) and "WORLD_SIZE" in os.environ:
-        from torch import distributed as dist
-
-        dist.barrier()
