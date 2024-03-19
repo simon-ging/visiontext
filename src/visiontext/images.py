@@ -16,6 +16,10 @@ pip install -U pyturbojpeg opencv-python pillow
 
 Todo: Write tests, does it work with all kinds of images (grayscale, RGB, RGBA)
 
+Todo: this CMYK file breaks libjpeg-turbo
+
+/misc/lmbssd/gings/datasets/imagenet1k/val/n13133613/ILSVRC2012_val_00019877.JPEG
+
 Examples:
     >>> from IPython.display import display
     >>> image = open_image_scaled("image.png", bigger_side=500)
@@ -30,6 +34,7 @@ from typing import Union, Optional
 import numpy as np
 from PIL import Image
 from PIL.Image import Image as PILImage, Resampling
+from loguru import logger
 
 from packg import format_exception
 from packg.constclass import Const
@@ -65,9 +70,6 @@ try:
 except ImportError:
     tjpeg = None
 
-
-# ref: https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-filters
-
 SamplingMapPIL = {
     SamplingConst.NEAREST: Resampling.NEAREST,
     SamplingConst.BILINEAR: Resampling.BILINEAR,
@@ -101,9 +103,11 @@ class _TjpegGetter:
     def get(self):
         if self.jpeg is None:
             if tjpeg is None:
-                raise ImportError("turbojpeg not installed. To install, run:\n"
-                                  "conda install -c conda-forge libjpeg-turbo -y\n"
-                                  "pip install -U pyturbojpeg")
+                raise ImportError(
+                    "turbojpeg not installed. To install, run:\n"
+                    "conda install -c conda-forge libjpeg-turbo -y\n"
+                    "pip install -U pyturbojpeg"
+                )
             self.jpeg = tjpeg.TurboJPEG()
         return self.jpeg
 
@@ -156,6 +160,7 @@ def decode_jpeg(
     Returns:
         decoded image shape (h, w, 3) dtype uint8 in [0, 255] OR pillow image
     """
+    decoded_arr = None
     if method == JPEGDecoderConst.OPENCV:
         if isinstance(jpeg_arr, bytes):
             jpeg_arr = np.frombuffer(jpeg_arr, dtype=np.uint8)
@@ -164,23 +169,37 @@ def decode_jpeg(
         else:
             decoded_arr = cv2.imdecode(jpeg_arr, cv2.IMREAD_COLOR)
             decoded_arr = cv2.cvtColor(decoded_arr, cv2.COLOR_BGR2RGB)
-    elif method == JPEGDecoderConst.LIBTURBOJPEG_DEFAULT:
-        decoded_arr = _jpeg_getter.get().decode(
-            jpeg_arr, pixel_format=tjpeg.TJPF_GRAY if is_gray else tjpeg.TJPF_RGB
-        )
-    elif method == JPEGDecoderConst.LIBTURBOJPEG_FASTEST:
-        decoded_arr = _jpeg_getter.get().decode(
-            jpeg_arr,
-            flags=tjpeg.TJFLAG_FASTUPSAMPLE | tjpeg.TJFLAG_FASTDCT,
-            pixel_format=tjpeg.TJPF_GRAY if is_gray else tjpeg.TJPF_RGB,
-        )
-    elif method == JPEGDecoderConst.PILLOW:
+    if (
+        method == JPEGDecoderConst.LIBTURBOJPEG_DEFAULT
+        or method == JPEGDecoderConst.LIBTURBOJPEG_FASTEST
+    ):
+        flags = 0
+        if method == JPEGDecoderConst.LIBTURBOJPEG_FASTEST:
+            flags |= tjpeg.TJFLAG_FASTUPSAMPLE | tjpeg.TJFLAG_FASTDCT
+        try:
+            decoded_arr = _jpeg_getter.get().decode(
+                jpeg_arr, pixel_format=tjpeg.TJPF_GRAY if is_gray else tjpeg.TJPF_RGB, flags=flags
+            )
+        except OSError as e:
+            # it seems there exist images that cannot be decoded correctly with libjpeg-turbo
+            # but pillow decodes them perfectly fine. therefore catch those errors and call pillow.
+            error_str = format_exception(e)
+            if error_str == "OSError: Unsupported color conversion request":
+                logger.error(
+                    f"{error_str} for image bytes of length {len(jpeg_arr)}. "
+                    f"Decoding with pillow instead of libjpeg-turbo."
+                )
+                method = JPEGDecoderConst.PILLOW
+                decoded_arr = None
+            else:
+                raise e
+    if method == JPEGDecoderConst.PILLOW:
         # noinspection PyTypeChecker
         decoded_arr = np.array(Image.open(io.BytesIO(jpeg_arr)).convert("L" if is_gray else "RGB"))
-    elif method == JPEGDecoderConst.PILLOW_IMAGE:
+    if method == JPEGDecoderConst.PILLOW_IMAGE:
         pil_image = Image.open(io.BytesIO(jpeg_arr)).convert("L" if is_gray else "RGB")
         return pil_image
-    else:
+    if decoded_arr is None:
         raise ValueError(f"Unknown JPEG decoding method {method}")
     if is_gray and decoded_arr.ndim == 3:
         decoded_arr = np.squeeze(decoded_arr, axis=-1)
