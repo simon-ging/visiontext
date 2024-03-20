@@ -48,7 +48,10 @@ class TarLookup:
         index_file = Path(index_file)
 
         if verbose:
-            print(f"Creating TarLookup with index {index_file} and base path {base_path}")
+            print(
+                f"Creating TarLookup with index {index_file} and base path {base_path} "
+                f"with {len(tar_files_rel)} tar files."
+            )
 
         filename_cache_file = Path(f"{index_file.as_posix()}.filenames.json")
         if delete_index:
@@ -66,7 +69,7 @@ class TarLookup:
                 os.makedirs(index_file.parent, exist_ok=True)
                 if sort_tar_files:
                     tar_files_rel = sorted(tar_files_rel)
-                for tar_file_rel in tar_files_rel:
+                for i, tar_file_rel in enumerate(tar_files_rel):
                     if tar_file_rel.is_absolute():
                         try:
                             tar_file_rel = tar_file_rel.relative_to(base_path)
@@ -78,7 +81,10 @@ class TarLookup:
                     if not tar_file_abs.is_file():
                         raise FileNotFoundError(f"Tar file {tar_file_abs} not found.")
                     if verbose:
-                        print(f"Indexing in {base_path} file {tar_file_rel} to {index_file}")
+                        print(
+                            f"Indexing file {i}/{len(tar_file_rel)} dir {base_path} "
+                            f"filename {tar_file_rel} to {index_file}"
+                        )
                     # create sqlite index
                     index_tar(base_path, tar_file_rel, index_file, verbose=verbose)
             barrier_safe()
@@ -223,4 +229,3 @@ class TarLookup:
 
     def __len__(self):
         return self.n_content_files
-
