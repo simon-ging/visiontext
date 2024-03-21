@@ -52,6 +52,8 @@ class TarLookup:
                 f"Creating TarLookup with index {index_file} and base path {base_path} "
                 f"with {len(tar_files_rel)} tar files."
             )
+        if len(tar_files_rel) == 0:
+            raise ValueError(f"No tar files to index for base path {base_path}.")
 
         filename_cache_file = Path(f"{index_file.as_posix()}.filenames.json")
         if delete_index:
