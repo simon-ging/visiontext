@@ -82,7 +82,7 @@ class TarLookup:
                         raise FileNotFoundError(f"Tar file {tar_file_abs} not found.")
                     if verbose:
                         print(
-                            f"Indexing file {i}/{len(tar_file_rel)} dir {base_path} "
+                            f"Indexing file {i}/{len(tar_files_rel)} dir {base_path} "
                             f"filename {tar_file_rel} to {index_file}"
                         )
                     # create sqlite index
