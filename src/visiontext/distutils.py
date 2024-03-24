@@ -51,6 +51,12 @@ def print_main(*args, **kwargs):
         print(*args, **kwargs)
 
 
+def print_with_rank(*args, **kwargs):
+    rank = get_rank()
+    world_size = get_world_size()
+    print(f"Rank {rank:>2d}/{world_size}:", *args, **kwargs)
+
+
 def is_main_process():
     rank, _world_size = get_world_info()
     return rank == 0
