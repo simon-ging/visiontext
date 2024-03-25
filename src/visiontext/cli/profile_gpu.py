@@ -23,6 +23,10 @@ def main():
         print(f"    torch.cuda.is_available()={torch.cuda.is_available()}")
         print(f"    torch.cuda.device_count()={torch.cuda.device_count()}")
         print(f"    torch.backends.cudnn.version()={torch.backends.cudnn.version()}")
+        print(f"    torch.cuda.get_device_capability()={torch.cuda.get_device_capability()}")
+        print(f"    torch.cuda.is_bf16_supported()={torch.cuda.is_bf16_supported()}")
+        # https://github.com/pytorch/pytorch/issues/75427
+        # before compute capability 8.0 bfloat16 does not offer speed-ups and might fail.
         example_tensor = torch.zeros(128, 1024, 768).cuda()
         print(f"    example_tensor.shape={example_tensor.shape}")
 
