@@ -184,7 +184,10 @@ def decode_jpeg(
             # it seems there exist images that cannot be decoded correctly with libjpeg-turbo
             # but pillow decodes them perfectly fine. therefore catch those errors and call pillow.
             error_str = format_exception(e)
-            if error_str == "OSError: Unsupported color conversion request":
+            if (
+                error_str == "OSError: Unsupported color conversion request"
+                or "Could not determine subsampling type for JPEG image" in error_str
+            ):
                 logger.error(
                     f"{error_str} for image bytes of length {len(jpeg_arr)}. "
                     f"Decoding with pillow instead of libjpeg-turbo."
