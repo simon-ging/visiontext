@@ -71,4 +71,4 @@ def barrier_safe():
 
 
 def is_distributed():
-    return "WORLD_SIZE" in os.environ
+    return "WORLD_SIZE" in os.environ and get_world_size() > 1
