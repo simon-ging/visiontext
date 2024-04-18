@@ -72,6 +72,7 @@ class TarLookup:
                 if sort_tar_files:
                     tar_files_rel = sorted(tar_files_rel)
                 for i, tar_file_rel in enumerate(tar_files_rel):
+                    tar_file_rel = Path(tar_file_rel)
                     if tar_file_rel.is_absolute():
                         try:
                             tar_file_rel = tar_file_rel.relative_to(base_path)

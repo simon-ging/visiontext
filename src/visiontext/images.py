@@ -188,10 +188,10 @@ def decode_jpeg(
                 error_str == "OSError: Unsupported color conversion request"
                 or "Could not determine subsampling type for JPEG image" in error_str
             ):
-                logger.error(
-                    f"{error_str} for image bytes of length {len(jpeg_arr)}. "
-                    f"Decoding with pillow instead of libjpeg-turbo."
-                )
+                # logger.error(
+                #     f"{error_str} for image bytes of length {len(jpeg_arr)}. "
+                #     f"Decoding with pillow instead of libjpeg-turbo."
+                # )
                 method = JPEGDecoderConst.PILLOW
                 decoded_arr = None
             else:
