@@ -425,7 +425,7 @@ def open_image_scaled(
         )
 
 
-def get_properties(image_file):
+def get_image_properties(image_file):
     """
     Modes: https://pillow.readthedocs.io/en/stable/handbook/concepts.html
 

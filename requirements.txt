@@ -1,10 +1,12 @@
 ipython
 packg
 numpy
+scipy
 matplotlib
 seaborn
 jupyter
 notebook
+itables
 ipdb
 nltk
 pandas
@@ -22,3 +24,5 @@ chardet
 spacy
 lmdb
 msgpack
+
+pydub  # audio processing
