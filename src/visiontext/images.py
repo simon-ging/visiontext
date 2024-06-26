@@ -16,9 +16,7 @@ pip install -U pyturbojpeg opencv-python pillow
 
 Todo: Write tests, does it work with all kinds of images (grayscale, RGB, RGBA)
 
-Todo: this CMYK file breaks libjpeg-turbo
-
-/misc/lmbssd/gings/datasets/imagenet1k/val/n13133613/ILSVRC2012_val_00019877.JPEG
+Todo: this CMYK file breaks libjpeg-turbo: datasets/imagenet1k/val/n13133613/ILSVRC2012_val_00019877.JPEG
 
 Examples:
     >>> from IPython.display import display
@@ -47,27 +45,18 @@ class SamplingConst:
     AUTO = "auto"
 
 
-# optional opencv-python
+# optional packages opencv-python and libturbojpeg
+
 try:
     import cv2
-
-    # ref: https://chadrick-kwag.net/cv2-resize-interpolation-methods/
-    SamplingMapCV2 = {
-        SamplingConst.NEAREST: cv2.INTER_NEAREST,
-        SamplingConst.BILINEAR: cv2.INTER_LINEAR,
-        SamplingConst.AREA: cv2.INTER_AREA,
-        SamplingConst.BICUBIC: cv2.INTER_CUBIC,
-        SamplingConst.LANCZOS: cv2.INTER_LANCZOS4,
-    }
-except ImportError as e:
-    cv2, SamplingMapCV2 = [None] * 2
-    raise e
-
-# optional libturbojpeg
-try:
-    import turbojpeg as tjpeg
 except ImportError:
-    tjpeg = None
+    cv2 = None
+
+
+try:
+    import turbojpeg
+except ImportError:
+    turbojpeg = None
 
 SamplingMapPIL = {
     SamplingConst.NEAREST: Resampling.NEAREST,
@@ -101,13 +90,13 @@ class _TjpegGetter:
 
     def get(self):
         if self.jpeg is None:
-            if tjpeg is None:
+            if turbojpeg is None:
                 raise ImportError(
                     "turbojpeg not installed. To install, run:\n"
                     "conda install -c conda-forge libjpeg-turbo -y\n"
                     "pip install -U pyturbojpeg"
                 )
-            self.jpeg = tjpeg.TurboJPEG()
+            self.jpeg = turbojpeg.TurboJPEG()
         return self.jpeg
 
 
@@ -128,7 +117,7 @@ def get_dummy_image_np() -> np.array:
 
 
 def check_turbojpeg_available() -> bool:
-    if tjpeg is None:
+    if turbojpeg is None:
         return False
     try:
         test_method = JPEGDecoderConst.LIBTURBOJPEG_DEFAULT
@@ -161,6 +150,8 @@ def decode_jpeg(
     """
     decoded_arr = None
     if method == JPEGDecoderConst.OPENCV:
+        import cv2
+
         if isinstance(jpeg_arr, bytes):
             jpeg_arr = np.frombuffer(jpeg_arr, dtype=np.uint8)
         if is_gray:
@@ -172,12 +163,16 @@ def decode_jpeg(
         method == JPEGDecoderConst.LIBTURBOJPEG_DEFAULT
         or method == JPEGDecoderConst.LIBTURBOJPEG_FASTEST
     ):
+        import turbojpeg
+
         flags = 0
         if method == JPEGDecoderConst.LIBTURBOJPEG_FASTEST:
-            flags |= tjpeg.TJFLAG_FASTUPSAMPLE | tjpeg.TJFLAG_FASTDCT
+            flags |= turbojpeg.TJFLAG_FASTUPSAMPLE | turbojpeg.TJFLAG_FASTDCT
         try:
             decoded_arr = _jpeg_getter.get().decode(
-                jpeg_arr, pixel_format=tjpeg.TJPF_GRAY if is_gray else tjpeg.TJPF_RGB, flags=flags
+                jpeg_arr,
+                pixel_format=turbojpeg.TJPF_GRAY if is_gray else turbojpeg.TJPF_RGB,
+                flags=flags,
             )
         except OSError as e:
             # it seems there exist images that cannot be decoded correctly with libjpeg-turbo
@@ -241,6 +236,8 @@ def encode_jpeg(
         raise ValueError("Unknown image shape: " + str(np_arr.shape))
 
     if method == JPEGDecoderConst.OPENCV:
+        import cv2
+
         params = (cv2.IMWRITE_JPEG_QUALITY, quality)
         if is_gray:
             encoded_arr = cv2.imencode(".jpg", np_arr, params=params)[1]
@@ -261,18 +258,23 @@ def encode_jpeg(
         np_arr.save(bio, format="JPEG", quality=quality)
         return bio.getvalue()
     if method == JPEGDecoderConst.LIBTURBOJPEG_DEFAULT:
-        assert cv2 is not None, "This method requires cv2: pip install opencv-python"
+        import turbojpeg
+        import cv2
+
         np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
         encoded_arr = _jpeg_getter.get().encode(
             np_arr_bgr, quality=quality, **_get_tjpeg_kwargs(is_gray)
         )
         return encoded_arr
     if method == JPEGDecoderConst.LIBTURBOJPEG_FASTEST:
+        import turbojpeg
+        import cv2
+
         np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
         encoded_arr = _jpeg_getter.get().encode(
             np_arr_bgr,
             quality=quality,
-            flags=tjpeg.TJFLAG_FASTUPSAMPLE | tjpeg.TJFLAG_FASTDCT,
+            flags=turbojpeg.TJFLAG_FASTUPSAMPLE | turbojpeg.TJFLAG_FASTDCT,
             **_get_tjpeg_kwargs(is_gray),
         )
         return encoded_arr
@@ -281,8 +283,8 @@ def encode_jpeg(
 
 def _get_tjpeg_kwargs(is_gray: bool) -> dict[str, int]:
     return {
-        "pixel_format": tjpeg.TJPF_GRAY if is_gray else tjpeg.TJPF_BGR,
-        "jpeg_subsample": tjpeg.TJSAMP_GRAY if is_gray else tjpeg.TJSAMP_422,
+        "pixel_format": turbojpeg.TJPF_GRAY if is_gray else turbojpeg.TJPF_BGR,
+        "jpeg_subsample": turbojpeg.TJSAMP_GRAY if is_gray else turbojpeg.TJSAMP_422,
     }
 
 
@@ -446,3 +448,19 @@ def show_image_pil(image: ImageType):
     if isinstance(image, np.ndarray):
         image = Image.fromarray(image)
     image.show()
+
+
+def get_interpolation_for_cv2(method: str):
+    # ref: https://chadrick-kwag.net/cv2-resize-interpolation-methods/
+    sampling_map_cv2 = {
+        SamplingConst.NEAREST: cv2.INTER_NEAREST,
+        SamplingConst.BILINEAR: cv2.INTER_LINEAR,
+        SamplingConst.AREA: cv2.INTER_AREA,
+        SamplingConst.BICUBIC: cv2.INTER_CUBIC,
+        SamplingConst.LANCZOS: cv2.INTER_LANCZOS4,
+    }
+    if method not in sampling_map_cv2:
+        raise KeyError(
+            f"Unknown image scaling method for cv2: {method}, "
+            f"available methods: {list(sampling_map_cv2.keys())}"
+        )
