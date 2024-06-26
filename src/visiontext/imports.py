@@ -35,6 +35,7 @@ from natsort import natsorted
 from pathlib import Path
 from pprint import pprint, pformat
 from timeit import default_timer as timer
+from timeit import default_timer
 from tqdm import tqdm
 from typing import (
     Dict,
@@ -124,6 +125,7 @@ __all__ = [
     "sys",
     "time",
     "timer",
+    "default_timer",
     "tqdm",
     "tqdm_max_ncols",
     "JSON",

@@ -28,13 +28,11 @@ Examples:
 from __future__ import annotations
 
 import io
-from dataclasses import dataclass
-from typing import Union, Optional
-
 import numpy as np
 from PIL import Image
 from PIL.Image import Image as PILImage, Resampling
-from loguru import logger
+from dataclasses import dataclass
+from typing import Union, Optional
 
 from packg import format_exception
 from packg.constclass import Const
@@ -61,8 +59,9 @@ try:
         SamplingConst.BICUBIC: cv2.INTER_CUBIC,
         SamplingConst.LANCZOS: cv2.INTER_LANCZOS4,
     }
-except ImportError:
+except ImportError as e:
     cv2, SamplingMapCV2 = [None] * 2
+    raise e
 
 # optional libturbojpeg
 try:
@@ -262,6 +261,7 @@ def encode_jpeg(
         np_arr.save(bio, format="JPEG", quality=quality)
         return bio.getvalue()
     if method == JPEGDecoderConst.LIBTURBOJPEG_DEFAULT:
+        assert cv2 is not None, "This method requires cv2: pip install opencv-python"
         np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
         encoded_arr = _jpeg_getter.get().encode(
             np_arr_bgr, quality=quality, **_get_tjpeg_kwargs(is_gray)

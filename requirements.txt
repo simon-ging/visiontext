@@ -19,6 +19,7 @@ pillow
 # # html / xml
 # beautifulsoup4
 # lxml
+termcolor
 
 chardet
 spacy
