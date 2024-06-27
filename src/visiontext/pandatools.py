@@ -11,6 +11,7 @@ from visiontext.images import PILImageScaler
 from visiontext.colormaps import redgreen_bright
 
 
+
 def create_styler(
     formats=None,
     vmin=0,
@@ -70,6 +71,9 @@ def full_pandas_display(
     """
     A context manager for setting various pandas display options to their
     maximum values so that the output is not truncated when printed.
+
+    Available options: https://pandas.pydata.org/docs/reference/api/pandas.get_option.html
+
     """
     with pd.option_context(
         "display.max_rows",
@@ -84,6 +88,16 @@ def full_pandas_display(
         expand_frame_repr,
     ):
         yield
+
+
+def pd_print_series(series):
+    keys = series.index.tolist()
+    values = series.values.tolist()
+    keys_str = [str(k) for k in keys]
+    values_str = [str(v) for v in values]
+    max_key_str_len = max([len(k) for k in keys_str])
+    for key, value in zip(keys_str, values_str):
+        print(f"{key:{max_key_str_len}}: {value}")
 
 
 def display_df(

@@ -1,6 +1,7 @@
 """
 Utilities for terminals
 """
+
 import termcolor
 
 
