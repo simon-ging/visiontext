@@ -62,7 +62,7 @@ from packg.tqdmext import tqdm_max_ncols
 from typedparser.objects import invert_dict_of_dict, flatten_dict
 from visiontext.htmltools import NotebookHTMLPrinter, display_html_table
 from visiontext.images import PILImageScaler, open_image_scaled
-from visiontext.nlp import preprocess_text_simple
+from visiontext.nlp.regextools import preprocess_text_simple
 from visiontext.pandatools import full_pandas_display
 
 # the __all__ list below is used to stop pycharm or other tools from removing unused imports

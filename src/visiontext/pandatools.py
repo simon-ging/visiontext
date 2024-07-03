@@ -6,10 +6,7 @@ from pandas.io.formats.style import Styler
 from pathlib import Path
 from typing import Optional
 
-from visiontext.images import PILImageScaler
-
 from visiontext.colormaps import redgreen_bright
-
 
 
 def create_styler(
