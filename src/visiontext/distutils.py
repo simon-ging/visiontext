@@ -73,7 +73,6 @@ def get_world_size(use_expected_world_size: bool = False) -> int:
                     f"Got mismatch betwen WORLD_SIZE={world_size} and "
                     f"EXPECTED_WORLD_SIZE={expected_world_size}"
                 )
-
     return world_size
 
 
@@ -95,7 +94,7 @@ def print_main(*args, **kwargs):
 
 def print_with_rank(*args, **kwargs):
     rank = get_rank()
-    world_size = get_world_size()
+    world_size = get_world_size(use_expected_world_size=False)
     print(f"Rank {rank:>2d}/{world_size}:", *args, **kwargs)
 
 
@@ -109,18 +108,7 @@ def barrier_safe():
     if is_distributed():
         from torch import distributed as dist
 
-        try:
-            dist.barrier()
-        except ValueError as e:
-            if os.environ.get("PSEUDO_WORLD_SIZE_WAS_SET", "") != "":
-                logger.error(
-                    "Barrier failed and variable PSEUDO_WORLD_SIZE_WAS_SET is set. This means "
-                    "that os.environ WORLD_SIZE was set manually but the actual process group is "
-                    "not initialized yet. To raise a hard error change "
-                    "function visiontext.distutils.barrier_safe()"
-                )
-            else:
-                raise e
+        dist.barrier()
 
 
 def is_distributed():
