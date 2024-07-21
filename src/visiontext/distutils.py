@@ -16,6 +16,8 @@ import multiprocessing
 import os
 from multiprocessing.process import BaseProcess
 
+from packg.log import logger
+
 
 def get_process_info() -> str:
     process: BaseProcess = multiprocessing.current_process()
@@ -30,8 +32,48 @@ def get_world_info() -> tuple[int, int]:
     return get_rank(), get_world_size()
 
 
-def get_world_size():
+def set_expected_world_size(expected_world_size: int, verbose: bool = True):
+    """
+    In certain scenarios like lightning training you may want to init your dataset or loss
+    already before trainer.fit is called. At that point, the global world_size is still 1
+    because ligthning hasn't initialized the distributed backend yet.
+    However if you know what the world_size will be later, you can set it here and
+    initialize your dataset with the correct world_size.
+    """
+    old_world_size = get_world_size(use_expected_world_size=False)
+    if 1 < old_world_size != expected_world_size:
+        raise ValueError(
+            f"Setting EXPECTED_WORLD_SIZE to {expected_world_size} but WORLD_SIZE is already "
+            f"set to {old_world_size}."
+        )
+    if not isinstance(expected_world_size, int) or expected_world_size < 1:
+        raise ValueError(f"Invalid world size: {expected_world_size}")
+    if expected_world_size == old_world_size:
+        if verbose:
+            print_with_rank(
+                f"EXPECTED_WORLD_SIZE==WORLD_SIZE=={expected_world_size}, nothing to set."
+            )
+        return
+    if verbose:
+        print_with_rank(f"Setting EXPECTED_WORLD_SIZE={expected_world_size}")
+    os.environ["EXPECTED_WORLD_SIZE"] = str(expected_world_size)
+
+
+def get_world_size(use_expected_world_size: bool = False) -> int:
+    """
+    Args:
+        use_expected_world_size: whether to override with EXPECTED_WORLD_SIZE env variable if set.
+    """
     world_size = int(os.environ.get("WORLD_SIZE", 1))
+    if use_expected_world_size:
+        expected_world_size = int(os.environ.get("EXPECTED_WORLD_SIZE", None))
+        if expected_world_size is not None:
+            if 1 < world_size != expected_world_size:
+                raise ValueError(
+                    f"Got mismatch betwen WORLD_SIZE={world_size} and "
+                    f"EXPECTED_WORLD_SIZE={expected_world_size}"
+                )
+
     return world_size
 
 
@@ -67,7 +109,18 @@ def barrier_safe():
     if is_distributed():
         from torch import distributed as dist
 
-        dist.barrier()
+        try:
+            dist.barrier()
+        except ValueError as e:
+            if os.environ.get("PSEUDO_WORLD_SIZE_WAS_SET", "") != "":
+                logger.error(
+                    "Barrier failed and variable PSEUDO_WORLD_SIZE_WAS_SET is set. This means "
+                    "that os.environ WORLD_SIZE was set manually but the actual process group is "
+                    "not initialized yet. To raise a hard error change "
+                    "function visiontext.distutils.barrier_safe()"
+                )
+            else:
+                raise e
 
 
 def is_distributed():
