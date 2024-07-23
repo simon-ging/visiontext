@@ -66,8 +66,9 @@ def get_world_size(use_expected_world_size: bool = False) -> int:
     """
     world_size = int(os.environ.get("WORLD_SIZE", 1))
     if use_expected_world_size:
-        expected_world_size = int(os.environ.get("EXPECTED_WORLD_SIZE", None))
+        expected_world_size = os.environ.get("EXPECTED_WORLD_SIZE", None)
         if expected_world_size is not None:
+            expected_world_size = int(expected_world_size)
             if 1 < world_size != expected_world_size:
                 raise ValueError(
                     f"Got mismatch betwen WORLD_SIZE={world_size} and "
