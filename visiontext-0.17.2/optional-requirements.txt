@@ -1,0 +1,2 @@
+pyturbojpeg
+opencv-python

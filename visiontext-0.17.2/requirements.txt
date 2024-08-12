@@ -1,0 +1,29 @@
+ipython
+packg
+numpy
+scipy
+matplotlib
+seaborn
+jupyter
+notebook
+itables
+ipdb
+nltk
+pandas
+pyinstrument
+nvidia-ml-py3  # gpu profiling
+psutil  # ram/cpu profiling
+h5py
+pillow
+
+# # html / xml
+# beautifulsoup4
+# lxml
+termcolor
+
+chardet
+spacy
+lmdb
+msgpack
+
+pydub  # audio processing

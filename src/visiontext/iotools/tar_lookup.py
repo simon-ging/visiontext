@@ -94,7 +94,7 @@ class TarLookup:
 
         # connect to database and load content
         try:
-            connection = sqlite3.connect(str(index_file))
+            connection = sqlite3.connect(str(index_file), check_same_thread=False)
         except sqlite3.OperationalError as e:
             print(f"Could not load {index_file}.")
             raise e
