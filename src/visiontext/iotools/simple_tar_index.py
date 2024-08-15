@@ -5,6 +5,7 @@ compared to the sqlite based tar indexer this is simpler, but probably less effi
 for large datasets because you always need to read the full index before searching,
 instead of relying on dataset selects.
 """
+from __future__ import annotations
 
 import tarfile
 from pathlib import Path
