@@ -11,7 +11,7 @@ ipdb
 nltk
 pandas
 pyinstrument
-nvidia-ml-py3  # gpu profiling
+nvidia-ml-py  # gpu profiling
 psutil  # ram/cpu profiling
 h5py
 pillow
