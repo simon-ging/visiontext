@@ -1,9 +1,8 @@
 import os
 from typing import Optional, List
 
-import nvidia_smi
 import psutil
-import pynvml
+import pynvml  # pip install nvidia-ml-py
 import torch
 from loguru import logger
 
@@ -185,7 +184,7 @@ class GPUProfilerNvml(GPUProfilerInterface):
     Get information about GPU and RAM usage as string.
 
     Setup:
-        pip install nvidia-ml-py3 pynvml
+        pip install nvidia-ml-py pynvml
 
     Notes:
         gpu_load:
@@ -204,14 +203,14 @@ class GPUProfilerNvml(GPUProfilerInterface):
         self.gpu_count = -1
         self.gpu_handles = []
 
-        nvidia_smi.nvmlInit()
-        self.gpu_count = nvidia_smi.nvmlDeviceGetCount()
+        pynvml.nvmlInit()
+        self.gpu_count = pynvml.nvmlDeviceGetCount()
         if self.gpu_count == 0:
             self.gpu_count = 1
         self.gpu_handles = []
         for i in range(self.gpu_count):
             try:
-                handle = nvidia_smi.nvmlDeviceGetHandleByIndex(i)
+                handle = pynvml.nvmlDeviceGetHandleByIndex(i)
             except Exception as e:
                 print(f"WARNING: Could not get handle for GPU {i} due to {format_exception(e)}")
                 handle = None
@@ -232,18 +231,18 @@ class GPUProfilerNvml(GPUProfilerInterface):
         gpu_numbers = self.get_gpu_numbers() if gpu_numbers is None else gpu_numbers
         gpu_numbers = [i for i in gpu_numbers if self.gpu_handles[i] is not None]
 
-        mem_objs = [nvidia_smi.nvmlDeviceGetMemoryInfo(self.gpu_handles[i]) for i in gpu_numbers]
+        mem_objs = [pynvml.nvmlDeviceGetMemoryInfo(self.gpu_handles[i]) for i in gpu_numbers]
         mem_total = [mem_obj.total / 1024**3 for mem_obj in mem_objs]
         mem_used = [mem_obj.used / 1024**3 for mem_obj in mem_objs]
-        names = [nvidia_smi.nvmlDeviceGetName(self.gpu_handles[i]) for i in gpu_numbers]
+        names = [pynvml.nvmlDeviceGetName(self.gpu_handles[i]) for i in gpu_numbers]
         load_objs = [
-            nvidia_smi.nvmlDeviceGetUtilizationRates(self.gpu_handles[i]) for i in gpu_numbers
+            pynvml.nvmlDeviceGetUtilizationRates(self.gpu_handles[i]) for i in gpu_numbers
         ]
         load_gpu = [load_obj.gpu / 100 for load_obj in load_objs]
         load_gpu_mem = [load_obj.memory / 100 for load_obj in load_objs]
         temp = [
-            nvidia_smi.nvmlDeviceGetTemperature(
-                self.gpu_handles[i], nvidia_smi.NVML_TEMPERATURE_GPU
+            pynvml.nvmlDeviceGetTemperature(
+                self.gpu_handles[i], pynvml.NVML_TEMPERATURE_GPU
             )
             for i in gpu_numbers
         ]
@@ -275,8 +274,8 @@ class GPUProfilerNvml(GPUProfilerInterface):
                 logger.error(f"ERROR: GPU {i} handle could not be created at startup.")
                 continue
             try:
-                nvidia_smi.nvmlDeviceGetClockInfo(
-                    self.gpu_handles[i], nvidia_smi.NVML_CLOCK_GRAPHICS
+                pynvml.nvmlDeviceGetClockInfo(
+                    self.gpu_handles[i], pynvml.NVML_CLOCK_GRAPHICS
                 )
             except Exception as e:
                 logger.error(f"GPU {i} has error: {format_exception(e)}")
