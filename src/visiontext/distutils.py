@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import multiprocessing
 import os
-from multiprocessing.process import BaseProcess
 from deprecated import deprecated
+from multiprocessing.process import BaseProcess
 
 
 class WorldInfo:
@@ -37,22 +37,19 @@ class WorldInfo:
             return self.trainer.world_size
         return get_world_size()
 
+    @property
+    def is_global_zero(self):
+        return self.global_rank == 0
+
     def print_with_rank(self, *args, **kwargs):
         rank = self.global_rank
         world_size = self.world_size
         print(f"Rank {rank:>2d}/{world_size}:", *args, **kwargs)
 
-    @property
-    def is_global_zero(self):
-        return self.global_rank == 0
-
-    @property
     def barrier_safe(self):
         if self.trainer is not None:
             return self.trainer.strategy.barrier()
         return barrier_safe()
-
-
 
 
 def get_process_info() -> str:
