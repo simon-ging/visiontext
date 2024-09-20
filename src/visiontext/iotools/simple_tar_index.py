@@ -44,6 +44,8 @@ class SingleTarLookup:
         return self.filenames
 
     def get_file_info(self, filename_in: str) -> tuple[int, int, float]:
+        if filename_in not in self.index["files"]:
+            raise FileNotFoundError(f"{filename_in} not found in {self.tar_file}")
         return self.index["files"][filename_in]
 
     def get_file_content(self, filename_in: str) -> bytes:

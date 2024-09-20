@@ -153,7 +153,7 @@ def get_colored_html_text_from_lists(c_list, t_list, sep=""):
     return full_text
 
 
-def convert_image_to_html(pil_image: Image.Image) -> str:
+def convert_image_to_html(pil_image: Image.Image, addstr:str="") -> str:
     """
     Usage:
         display(HTML(convert_image_to_html(pil_image)))
@@ -168,7 +168,12 @@ def convert_image_to_html(pil_image: Image.Image) -> str:
     pil_image.save(bio, "png")
     bios = bio.getbuffer()
     biosb64 = str(base64.b64encode(bios), "ascii")
-    html_str = f'<img src="data:image/png;base64,{biosb64}"/>'
+    addstr = addstr.strip()
+    if addstr == "":
+        addstr = " "
+    else:
+        addstr = f" {addstr} "
+    html_str = f'<img{addstr}src="data:image/png;base64,{biosb64}"/>'
     return html_str
 
 
