@@ -101,7 +101,10 @@ def is_slurm_sbatch():
     if slurm_job_name == "bash":
         # in foreground slurm job
         return False
-    # in background slurm job
+    if "SLURM_NTASKS" not in os.environ:
+        # special setup with e.g. background slurm job that runs a jupyter frontend
+        return False
+    # actual background slurm job
     return True
 
 
