@@ -37,7 +37,8 @@ Utilities for deep learning on multimodal data.
 
 ## Install
 
-Requires `python>=3.8` `pytorch` `sqlite`
+Requires `python>=3.8`, requires `pytorch` to be installed already, 
+see [https://pytorch.org/](https://pytorch.org/)
 
 ```bash
 pip install visiontext
@@ -45,12 +46,11 @@ pip install visiontext
 
 ### Full build
 
-Additionally requires `libjpeg-turbo`:
+Additionally requires `libjpeg-turbo` and `sqlite`
 
 ```bash
 pip install visiontext[full]
 ```
-
 
 ## Dev install
 
