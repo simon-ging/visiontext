@@ -22,7 +22,7 @@ pillow
 termcolor
 
 chardet
-spacy
+spacy;python_version>'3.8'  # spacy is not supported on python 3.8
 lmdb
 msgpack
 
