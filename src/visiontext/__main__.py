@@ -18,11 +18,14 @@ def main():
     target_module = sys.argv[1]
     args = sys.argv[2:]
     # load the spec to modify sys.argv before importing, otherwise it's too late
-    spec = importlib.util.find_spec(f"{lib_module_name}.{target_module}")
+    module_to_load = f"{lib_module_name}.{target_module}"
+    spec = importlib.util.find_spec(module_to_load)
+    if spec is None:
+        raise ValueError(f"Module {module_to_load} not found")
     origin = spec.origin
     sys.argv = [origin] + args
     # import the module and run the main function
-    module = importlib.import_module(f"{lib_module_name}.{target_module}")
+    module = importlib.import_module(module_to_load)
     module.main()
 
 
