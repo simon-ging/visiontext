@@ -104,9 +104,7 @@ def test_jpeg_coding():
                 # decode gray image to rgb
                 t = _Timer()
                 for n in range(runs):
-                    img_gray_re_as_rgb = decode_jpeg(
-                        bytes_gray, decoder_method, is_gray=False
-                    )
+                    img_gray_re_as_rgb = decode_jpeg(bytes_gray, decoder_method, is_gray=False)
                 t.stop(runs, "DecRGB")
                 _assert_shape_dtype(img_gray_re_as_rgb, (h, w, 3))
                 err = _image_delta(img_gray, img_gray_re_as_rgb)

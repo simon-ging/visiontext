@@ -3,6 +3,7 @@ spacy does not support python 3.8 so we only run these tests when using the "ful
 """
 
 import sys
+
 import pytest
 
 if sys.version_info >= (3, 9):

@@ -56,7 +56,7 @@ pip install visiontext[full]
 
 Clone repository and cd into, then:
 
-~~~bash
+```bash
 pip install pytest pytest-cov pylint black[jupyter]
 pylint visiontext
 pylint tests
@@ -69,7 +69,7 @@ python -m pytest --cov
 pip install -e .
 python -m pytest --cov -m "not full"
 
-~~~
+```
 
 ## Changelog
 

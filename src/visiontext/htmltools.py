@@ -153,7 +153,7 @@ def get_colored_html_text_from_lists(c_list, t_list, sep=""):
     return full_text
 
 
-def convert_image_to_html(pil_image: Image.Image, addstr:str="") -> str:
+def convert_image_to_html(pil_image: Image.Image, addstr: str = "") -> str:
     """
     Usage:
         display(HTML(convert_image_to_html(pil_image)))

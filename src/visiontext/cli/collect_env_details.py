@@ -80,7 +80,9 @@ def nice_print(details: dict, level: int = 0) -> list:
 
 def main() -> None:
     details = {"System": info_system(), "CUDA": info_cuda(), "Packages": info_packages()}
-    details["Lightning"] = {k: v for k, v in details["Packages"].items() if "torch" in k or "lightning" in k}
+    details["Lightning"] = {
+        k: v for k, v in details["Packages"].items() if "torch" in k or "lightning" in k
+    }
     lines = nice_print(details)
     text = os.linesep.join(lines)
     print(f"<details>\n  <summary>Current environment</summary>\n\n{text}\n\n</details>")

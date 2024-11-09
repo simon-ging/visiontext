@@ -1,5 +1,6 @@
-import numpy as np
 import re
+
+import numpy as np
 from matplotlib import pyplot as plt
 
 from visiontext.htmltools import convert_figure_to_html_tag

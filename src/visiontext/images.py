@@ -23,6 +23,7 @@ Examples:
     >>> image = open_image_scaled("image.png", bigger_side=500)
     >>> display(image)
 """
+
 from __future__ import annotations
 
 import io

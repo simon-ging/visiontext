@@ -1,10 +1,11 @@
-import numpy as np
 import os
-import pytest
 import tarfile
 import time
-from PIL import Image
 from pathlib import Path
+
+import numpy as np
+import pytest
+from PIL import Image
 
 from packg.iotools import dump_json, load_json
 from visiontext.iotools.simple_tar_index import (

@@ -235,15 +235,11 @@ class GPUProfilerNvml(GPUProfilerInterface):
         mem_total = [mem_obj.total / 1024**3 for mem_obj in mem_objs]
         mem_used = [mem_obj.used / 1024**3 for mem_obj in mem_objs]
         names = [pynvml.nvmlDeviceGetName(self.gpu_handles[i]) for i in gpu_numbers]
-        load_objs = [
-            pynvml.nvmlDeviceGetUtilizationRates(self.gpu_handles[i]) for i in gpu_numbers
-        ]
+        load_objs = [pynvml.nvmlDeviceGetUtilizationRates(self.gpu_handles[i]) for i in gpu_numbers]
         load_gpu = [load_obj.gpu / 100 for load_obj in load_objs]
         load_gpu_mem = [load_obj.memory / 100 for load_obj in load_objs]
         temp = [
-            pynvml.nvmlDeviceGetTemperature(
-                self.gpu_handles[i], pynvml.NVML_TEMPERATURE_GPU
-            )
+            pynvml.nvmlDeviceGetTemperature(self.gpu_handles[i], pynvml.NVML_TEMPERATURE_GPU)
             for i in gpu_numbers
         ]
         names_str = []
@@ -274,9 +270,7 @@ class GPUProfilerNvml(GPUProfilerInterface):
                 logger.error(f"ERROR: GPU {i} handle could not be created at startup.")
                 continue
             try:
-                pynvml.nvmlDeviceGetClockInfo(
-                    self.gpu_handles[i], pynvml.NVML_CLOCK_GRAPHICS
-                )
+                pynvml.nvmlDeviceGetClockInfo(self.gpu_handles[i], pynvml.NVML_CLOCK_GRAPHICS)
             except Exception as e:
                 logger.error(f"GPU {i} has error: {format_exception(e)}")
                 has_errors = True

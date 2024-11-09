@@ -1,5 +1,4 @@
 import sys
-
 from pprint import pprint
 
 import pytest
@@ -18,7 +17,7 @@ def test_imports_from_source(module: str) -> None:
         apply_visitor(module=module, visitor=ImportFromSourceChecker(module))
     except ModuleNotFoundError as e:
         if str(e) == "No module named 'spacy'" and sys.version < "3.9":
-            version_str = str(sys.version).replace('\n', ' ').strip()
+            version_str = str(sys.version).replace("\n", " ").strip()
             print(
                 f"{format_exception(e)} but spacy is not supported for python {version_str} "
                 f"so this exception is expected."
