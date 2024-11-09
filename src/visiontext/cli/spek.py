@@ -2,13 +2,10 @@
 Compute spectrogram of an audio file.
 """
 
-from pathlib import Path
-
-import matplotlib.pyplot as plt
 from attrs import define
 from loguru import logger
-
 from packg.log import SHORTEST_FORMAT, configure_logger, get_logger_level_from_args
+from pathlib import Path
 from typedparser import VerboseQuietArgs, add_argument, TypedParser
 from visiontext.audiotools import load_audio_file, AudioConvertC, check_audio_quality
 
