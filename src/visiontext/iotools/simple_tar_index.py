@@ -9,10 +9,13 @@ instead of relying on dataset selects.
 from __future__ import annotations
 
 import tarfile
+from natsort import natsorted
 from pathlib import Path
 from typing import Optional
 
+from packg import format_exception
 from packg.iotools import load_json, dump_json
+from packg.log import logger
 from packg.typext import PathType
 
 
@@ -117,3 +120,94 @@ def build_tar_fileindex(tar_file: PathType) -> dict[str, tuple[int, int, float]]
             continue
         fileindex[tarinfo.name] = [tarinfo.offset_data, tarinfo.size, tarinfo.mtime]
     return fileindex
+
+
+def search_and_compress_files_to_tar(
+    tar_file: PathType,
+    base_dir: PathType,
+    patterns: tuple[str] = ("**/*",),
+    verify: bool = True,
+    delete_files: bool = False,
+    sort_fn: Optional[callable] = natsorted,
+):
+    rel_files = []
+    for pattern in patterns:
+        rel_files.extend([file.relative_to(base_dir).as_posix() for file in base_dir.glob(pattern)])
+    if len(rel_files) == 0:
+        raise FileNotFoundError(f"No files found to compress for\n{base_dir=}\n{patterns=}")
+    if sort_fn is not None:
+        rel_files = sort_fn(rel_files)
+    logger.info(f"Found {len(rel_files)} files in {base_dir}, compressing to {tar_file}")
+    compress_files_to_tar(tar_file, base_dir, rel_files, verify=verify, delete_files=delete_files)
+
+
+def compress_files_to_tar(
+    tar_file: PathType,
+    base_dir: PathType,
+    rel_files: list[PathType],
+    delete_files: bool = False,
+    verify: bool = True,
+):
+    if tar_file.is_file():
+        if verify:
+            # todo verify tar and files
+            return
+        return
+    # tar does not exist, create the tar
+    if len(rel_files) == 0:
+        raise FileNotFoundError(f"No files given to compress.")
+    with tarfile.open(tar_file.as_posix(), "w") as tar:
+        for file_rel in rel_files:
+            file_full = base_dir / file_rel
+            info = tar.gettarinfo(file_full.as_posix())
+            # write dummy user info
+            info.uid = 10999
+            info.gid = 10999
+            info.uname = "bigdata"
+            info.gname = "bigdata"
+            # info.mtime = file_fullstat().mtime
+            # info.size = file_full.stat().st_size
+            info.mode = 0o666
+            # save relative paths
+            info.name = file_rel
+            tar.addfile(info, file_full.open("rb"))
+    if verify:
+        assert verify_tar(tar_file, base_dir, rel_files), f"Verification failed for {tar_file}"
+    if delete_files:
+        logger.warning(f"Deleting {len(rel_files)} files in {base_dir} after compression.")
+        for file_rel in rel_files:
+            (base_dir / file_rel).unlink()
+
+
+def verify_tar(tar_file: PathType, base_dir: PathType, rel_files: list[PathType]) -> bool:
+    # check tar contains all files from above, and only those
+    file_missing = {f: True for f in rel_files}
+    try:
+        with tarfile.open(tar_file.as_posix(), "r") as tar:
+            for tarinfo in tar:
+                assert tarinfo.isfile()
+                assert file_missing[tarinfo.name], f"Duplicate file: {tarinfo.name}"
+                file_missing[tarinfo.name] = False
+    except tarfile.ReadError as e:
+        logger.error(f"Failed to read tar file {tar_file}: {format_exception(e)}")
+        return False
+
+    missing_files = [f for f, missing in file_missing.items() if missing]
+    assert len(missing_files) == 0, f"Missing files: {missing_files}"
+
+    # check all files have correct content
+    try:
+        lookup = SingleTarLookup(tar_file)
+        assert natsorted(lookup.get_filenames()) == rel_files
+        for file_rel in rel_files:
+            content = lookup.get_file_content(file_rel)
+            gt_content = (base_dir / file_rel).read_bytes()
+            assert content == gt_content
+            offset, size, mtime = lookup.get_file_info(file_rel)
+            gt_stat = (base_dir / file_rel).stat()
+            assert size == gt_stat.st_size
+            assert mtime == gt_stat.st_mtime
+    except AssertionError as e:
+        logger.error(f"Verification failed for tar file {tar_file}: {format_exception(e)}")
+        return False
+    return True

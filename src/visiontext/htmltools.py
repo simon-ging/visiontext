@@ -16,6 +16,8 @@ class NotebookHTMLPrinter:
     This is better than calling display(HTML(...))) separately for each line because it allows
     for things to stay inside one output cell.
 
+    todo add option to add style to invdividual tr and td
+
     Usage:
         pr = NotebookHTMLPrinter()
         pr.print("<b>Hello World</b>", output=True)  # output=True to instantly display the HTML
@@ -52,11 +54,20 @@ class NotebookHTMLPrinter:
         """Start creating a HTML table e.g. for data output"""
         self.print(f"<table style='font-size:{font_size:.0%};{other_style}'>", end="")
 
-    def add_table_row(self, *args, is_header=False):
+    def add_table_row(self, *args, is_header=False, tr_style="", td_style=""):
+        if tr_style is None or tr_style == "":
+            tr_str = ""
+        else:
+            tr_str = f"style='{tr_style}'"
+        if td_style is None or td_style == "":
+            td_str = ""
+        else:
+            td_str = f"style='{td_style}'"
+
         tag = "th" if is_header else "td"
-        self.print("<tr>", end="")
+        self.print(f"<tr{tr_str}>", end="")
         for arg in args:
-            self.print(f"<{tag}>{arg}</{tag}>", end="")
+            self.print(f"<{tag}{td_style}>{arg}</{tag}>", end="")
         self.print("</tr>", end="")
 
     def close_table(self, output=True):
