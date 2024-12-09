@@ -67,7 +67,7 @@ class NotebookHTMLPrinter:
         tag = "th" if is_header else "td"
         self.print(f"<tr{tr_str}>", end="")
         for arg in args:
-            self.print(f"<{tag}{td_style}>{arg}</{tag}>", end="")
+            self.print(f"<{tag}{td_str}>{arg}</{tag}>", end="")
         self.print("</tr>", end="")
 
     def close_table(self, output=True):
