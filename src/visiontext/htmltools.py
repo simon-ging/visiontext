@@ -58,11 +58,11 @@ class NotebookHTMLPrinter:
         if tr_style is None or tr_style == "":
             tr_str = ""
         else:
-            tr_str = f"style='{tr_style}'"
+            tr_str = f" style='{tr_style}'"
         if td_style is None or td_style == "":
             td_str = ""
         else:
-            td_str = f"style='{td_style}'"
+            td_str = f" style='{td_style}'"
 
         tag = "th" if is_header else "td"
         self.print(f"<tr{tr_str}>", end="")
