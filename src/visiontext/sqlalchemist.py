@@ -1,4 +1,9 @@
+import os
 from copy import deepcopy
+from pathlib import Path
+
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import (
@@ -8,10 +13,6 @@ from sqlalchemy.orm import (
     sessionmaker,
     DeclarativeBase,
 )
-import os
-from pathlib import Path
-from sqlalchemy import Engine, create_engine
-from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from packg.log import logger
 
@@ -45,7 +46,7 @@ class DBOpener:
         self.engine: Engine = None
         self.session: Session = None
 
-    def connect(self):
+    def connect(self, create_all: bool = True):
         """Connect to the SQLite database."""
         if self.sqlite_db_file is not None and not self.sqlite_db_file.is_file():
             logger.warning(f"Database file not found, recreating: {self.sqlite_db_file}")
@@ -57,7 +58,8 @@ class DBOpener:
             **self.engine_kwargs,
         )
         self.session: Session = sessionmaker(bind=self.engine)()
-        self.db_model.metadata.create_all(self.engine, checkfirst=True)
+        if create_all:
+            self.db_model.metadata.create_all(self.engine, checkfirst=True)
 
         # self.connection = sqlite3.connect(self.db_file)
         # self.connection.row_factory = sqlite3.Row  # This allows us to get rows as dictionaries
@@ -130,7 +132,7 @@ def convert_sqlalchemy_rows_to_dict(result: list[Row]):
 
 
 def bulk_insert_mappings_ignore_dups_singlethreaded(
-    session, orm_table_class, unique_id_column_str, data: list[dict]
+    session: Session, orm_table_class, unique_id_column_str, data: list[dict]
 ):
     """
     insert with e.g. sqlite and ignore duplicates by checking for the ids in the table. in
@@ -190,11 +192,12 @@ def bulk_insert_mappings_ignore_dups_singlethreaded(
 
 
 def bulk_insert_mappings_ignore_dups_postgresql(
-    session,
+    session: Session,
     orm_table_class,
     index_elements: str | list[str],
     data: list[dict],
     count_inserts: bool = False,
+    dedup_input: bool = True,
 ):
     """
     postgresql dialect has a special insert statement that can ignore duplicates.
@@ -207,17 +210,25 @@ def bulk_insert_mappings_ignore_dups_postgresql(
         data: list of dict with each dict representing a row to insert
         count_inserts: if True, count and log the number of ignored duplicates.
             this is ~10-20x slower than without counting and logging.
-
+        dedup_input: if True, remove duplicates in the input data
     Returns:
 
     """
+    n_inputs_before_dedup = len(data)
     if isinstance(index_elements, str):
-        id2data = {d[index_elements]: d for d in data}
+        if dedup_input:
+            id2data = {d[index_elements]: d for d in data}
+            n_inputs_before_dedup = len(data)
+            data = list(id2data.values())
         index_elements = [index_elements]
     else:
         index_elements = list(index_elements)
-        id2data = {d[tuple(d[i] for i in index_elements)]: d for d in data}
-    stmt = pg_insert(orm_table_class).values(list(id2data.values()))
+        if dedup_input:
+            id2data = {d[tuple(d[i] for i in index_elements)]: d for d in data}
+            n_inputs_before_dedup = len(data)
+            data = list(id2data.values())
+
+    stmt = pg_insert(orm_table_class).values(data)
     # count the inserts
     stmt = stmt.on_conflict_do_nothing(index_elements=index_elements)
     if not count_inserts:
@@ -228,8 +239,8 @@ def bulk_insert_mappings_ignore_dups_postgresql(
     result = session.execute(stmt)
     num_inserts = len(list(result))
     if num_inserts < len(data):
-        i_in = len(data) - len(id2data)
-        i_db = len(id2data) - num_inserts
+        i_in = len(data) - n_inputs_before_dedup
+        i_db = n_inputs_before_dedup - num_inserts
         logger.warning(f"Input data: {len(data)}, ignored in input: {i_in}, already in db: {i_db}")
 
 
@@ -254,7 +265,11 @@ def get_orm_column_types(orm_table_class) -> dict[str, type]:
     return field2type
 
 
-def convert_data_types(orm_table_class, data: list[dict]):
+def convert_data_types(orm_table_class, data: list[dict], str_replace_0x00: bool = False):
+    """
+    Convert data to the table structure. E.g. if input is int, and table field is str, convert
+    to str. E.g.: studies_insert_list = convert_data_types(Studies, studies_insert_list)
+    """
     field2type = get_orm_column_types(orm_table_class)
     new_data = []
     for d in data:
@@ -264,8 +279,49 @@ def convert_data_types(orm_table_class, data: list[dict]):
             if v is None:
                 continue
             target_type = field2type[k]
-            if isinstance(v, target_type):
-                continue
-            dnew[k] = target_type(v)
+            if not isinstance(v, target_type):
+                v = target_type(v)
+            if str_replace_0x00 and target_type == str:
+                # avoid postgresql error: ValueError: A string literal cannot contain NUL (0x00)
+                v = v.replace("\x00", " ")
+            dnew[k] = v
         new_data.append(dnew)
     return new_data
+
+
+def _migrate_sqlite_to_postgresql_example():
+    import sqlite3
+    import pandas as pd
+
+    # 1. connect to sqlite
+    conn = sqlite3.connect("example.db")
+    cursor = conn.cursor()
+
+    # 2. list all existing tables
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    print(tables)
+
+    Example = None  # assuming this is the ORM class for the table
+    session: Session = None  # assuming this session is connected to postgresql with sqlalchemy ORM
+    chunk_size = 50000
+    for table_name, table_orm in [
+        ("example", Example),
+    ]:
+        print("*" * 70)
+        print("*" * 70, table_name)
+        print("*" * 70)
+        total = 0
+        # 3. select chunks
+        for chunk in pd.read_sql_query(f"SELECT * FROM {table_name}", conn, chunksize=chunk_size):
+            total += len(chunk)
+            print(f"Chunk with {len(chunk)} rows loaded. total {total}")
+            if total < 23150000:
+                continue
+            records: list[dict] = chunk.to_dict(orient="records")
+            # 4. convert to target column types and insert
+            records_conv = convert_data_types(table_orm, records, str_replace_0x00=True)
+            session.bulk_insert_mappings(table_orm, records_conv)
+            session.commit()
+
+    # conn.close()

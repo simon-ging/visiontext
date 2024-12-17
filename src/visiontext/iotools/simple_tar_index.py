@@ -60,6 +60,9 @@ class SingleTarLookup:
         content = tarf.read(size)
         return content
 
+    def has_file(self, filename_in: str) -> bool:
+        return filename_in in self.index["files"]
+
     def close(self):
         if self.worker_id in self.filepointers:
             self.filepointers[self.worker_id].close()

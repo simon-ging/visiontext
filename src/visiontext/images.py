@@ -453,6 +453,7 @@ def show_image_pil(image: ImageType):
 
 def get_interpolation_for_cv2(method: str):
     # ref: https://chadrick-kwag.net/cv2-resize-interpolation-methods/
+    import cv2
     sampling_map_cv2 = {
         SamplingConst.NEAREST: cv2.INTER_NEAREST,
         SamplingConst.BILINEAR: cv2.INTER_LINEAR,
@@ -465,3 +466,4 @@ def get_interpolation_for_cv2(method: str):
             f"Unknown image scaling method for cv2: {method}, "
             f"available methods: {list(sampling_map_cv2.keys())}"
         )
+    return sampling_map_cv2[method]
