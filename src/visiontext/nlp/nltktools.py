@@ -21,7 +21,7 @@ def ensure_setup_nltk(language="english"):
     try:
         load(f"tokenizers/punkt/{language}.pickle")
     except LookupError:
-        nltk.download("punkt")
+        nltk.download("punkt", quiet=True)
 
 
 def tokenize_sentences_and_connectors(text: str, language="english") -> list[tuple[str, str]]:
@@ -99,7 +99,14 @@ def apply_nltk_tokenizer(tokenizer, text: str) -> list[tuple[str, str]]:
 
 
 def main():
-    inp = "The image features two people standing on a snow-covered slope, both wearing skis and holding ski poles. They are posing for a picture, likely enjoying their time skiing on the mountain. The individuals are standing next to each other, with one person on the left and the other on the right. Their skis are placed in various positions, with one set of skis extending horizontally and the other set angled upward. The scene captures the excitement and fun of skiing on a mountain slope."
+    inp = """\
+The image features two people standing on a snow-covered slope, both wearing skis and holding ski \
+poles. They are posing for a picture, likely enjoying their time skiing on the mountain. The \
+individuals are standing next to each other, with one person on the left and the other on the \
+right. Their skis are placed in various positions, with one set of skis extending horizontally \
+and the other set angled upward. The scene captures the excitement and fun of skiing on a \
+mountain slope.\
+"""
     print(inp)
     words_and_connectors = tokenize_words_and_connectors(inp)
     print(words_and_connectors)

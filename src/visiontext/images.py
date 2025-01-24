@@ -28,9 +28,12 @@ from __future__ import annotations
 
 import io
 import numpy as np
+import os
+import torch
 from PIL import Image
 from PIL.Image import Image as PILImage, Resampling
 from dataclasses import dataclass
+from tempfile import NamedTemporaryFile
 from typing import Union, Optional
 
 from packg import format_exception
@@ -333,6 +336,26 @@ class PILImageScaler:
         img = img.resize((target_w, target_h), method)
         return self._prepare_return(img)
 
+    def scale_image_to_width(
+        self, img: ImageType, target_w: int, method: ResamplingMethodType = AUTO
+    ):
+        img = self._ensure_pil(img)
+        w, h = img.size
+        target_h = int(h * target_w / w)
+        method = self._get_method(h, w, target_h, target_w, method)
+        img = img.resize((target_w, target_h), method)
+        return self._prepare_return(img)
+
+    def scale_image_to_height(
+        self, img: ImageType, target_h: int, method: ResamplingMethodType = AUTO
+    ):
+        img = self._ensure_pil(img)
+        w, h = img.size
+        target_w = int(w * target_h / h)
+        method = self._get_method(h, w, target_h, target_w, method)
+        img = img.resize((target_w, target_h), method)
+        return self._prepare_return(img)
+
     def scale_image(
         self, img: ImageType, target_h: int, target_w: int, method: ResamplingMethodType = AUTO
     ):
@@ -391,6 +414,13 @@ class PILImageScaler:
 
 
 pil_editor = PILImageScaler(return_pillow=True)
+
+scale_image_smaller_side = pil_editor.scale_image_smaller_side
+scale_image_bigger_side = pil_editor.scale_image_bigger_side
+scale_image_to_width = pil_editor.scale_image_to_width
+scale_image_to_height = pil_editor.scale_image_to_height
+scale_image = pil_editor.scale_image
+crop_image_square = pil_editor.crop_square
 
 
 def _is_downsampling(h, w, target_h, target_w):
@@ -454,6 +484,7 @@ def show_image_pil(image: ImageType):
 def get_interpolation_for_cv2(method: str):
     # ref: https://chadrick-kwag.net/cv2-resize-interpolation-methods/
     import cv2
+
     sampling_map_cv2 = {
         SamplingConst.NEAREST: cv2.INTER_NEAREST,
         SamplingConst.BILINEAR: cv2.INTER_LINEAR,
@@ -467,3 +498,31 @@ def get_interpolation_for_cv2(method: str):
             f"available methods: {list(sampling_map_cv2.keys())}"
         )
     return sampling_map_cv2[method]
+
+
+def get_pil_image_from_torch_tensor(tensor: torch.Tensor) -> PILImage:
+    """
+    Convert a torch tensor to a PIL image.
+
+    Args:
+        tensor: tensor with shape (C, H, W) or (B, C, H, W)
+
+    Returns:
+        PIL image
+    """
+    if tensor.ndim == 4:
+        assert tensor.shape[0] == 1, f"Expected batch size 1, got {tensor.shape[0]}"
+        tensor = tensor[0]
+    tensor = tensor.detach().cpu().numpy()
+    tensor = np.moveaxis(tensor, 0, -1)
+    tensor = np.clip(tensor, 0.0, 1.0)
+    tensor = (tensor * 255).astype(np.uint8)
+    return Image.fromarray(tensor)
+
+
+def display_image_using_kitten_icat(image: Image.Image):
+    tempf = NamedTemporaryFile(delete=False, suffix=".jpg")
+    image.save(tempf.name)
+    tempf.close()
+    os.system(f'kitten icat "{tempf.name}"')
+    os.unlink(tempf.name)

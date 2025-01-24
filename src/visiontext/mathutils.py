@@ -1,8 +1,7 @@
 import math
-from typing import Optional, Union, Tuple, List
-
 import numpy as np
 import torch
+from typing import Optional, Union, Tuple, List
 
 from packg.maths import np_round_half_down
 
@@ -15,6 +14,17 @@ def torch_stable_softmax(inp, temp=1.0, dim=-1):
     denominator = torch.sum(numerator, dim=dim, keepdim=True)
     softmax = numerator / denominator
     return softmax
+
+
+def torch_cosine_similarity(x: torch.Tensor, y: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
+    """
+    Compute cosine similarity between two matrices x and y
+    or two vectors x and y.
+    """
+    eps = torch.tensor(eps, device=x.device)
+    x = x / torch.maximum(torch.norm(x, dim=-1, keepdim=True), eps)
+    y = y / torch.maximum(torch.norm(y, dim=-1, keepdim=True), eps)
+    return torch.matmul(x, y.T)
 
 
 def compute_indices(

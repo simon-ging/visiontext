@@ -1,7 +1,8 @@
+import re
 import os
 from copy import deepcopy
+from io import StringIO
 from pathlib import Path
-
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.engine.row import Row
@@ -13,6 +14,7 @@ from sqlalchemy.orm import (
     sessionmaker,
     DeclarativeBase,
 )
+from sqlalchemy.schema import CreateTable
 
 from packg.log import logger
 
@@ -224,7 +226,7 @@ def bulk_insert_mappings_ignore_dups_postgresql(
     else:
         index_elements = list(index_elements)
         if dedup_input:
-            id2data = {d[tuple(d[i] for i in index_elements)]: d for d in data}
+            id2data = {tuple(d[i] for i in index_elements): d for d in data}
             n_inputs_before_dedup = len(data)
             data = list(id2data.values())
 
@@ -316,8 +318,6 @@ def _migrate_sqlite_to_postgresql_example():
         for chunk in pd.read_sql_query(f"SELECT * FROM {table_name}", conn, chunksize=chunk_size):
             total += len(chunk)
             print(f"Chunk with {len(chunk)} rows loaded. total {total}")
-            if total < 23150000:
-                continue
             records: list[dict] = chunk.to_dict(orient="records")
             # 4. convert to target column types and insert
             records_conv = convert_data_types(table_orm, records, str_replace_0x00=True)
@@ -325,3 +325,29 @@ def _migrate_sqlite_to_postgresql_example():
             session.commit()
 
     # conn.close()
+
+
+def get_table_creation_sql(db_model, engine):
+    output = StringIO()
+    for table in db_model.metadata.sorted_tables:
+        sql = str(CreateTable(table).compile(engine))
+        output.write(sql + ";\n\n")
+    return output.getvalue()
+
+
+def split_postgresql_db_uri(dburi: str) -> tuple[str, str, str, str, str]:
+    """
+    Split dburi into it's components, e.g. to give the components to psycopg2.connect()
+
+    Args:
+        dburi: postgresql+psycopg2://USER:PASS@SERVER:PORT/DBNAME
+
+    Returns:
+        tuple of (user, password, server, port, dbname)
+
+    """
+    re_db = re.compile(r"postgresql\+psycopg2://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)")
+    m = re_db.match(dburi)
+    assert m is not None, f"DBURI {dburi} does not match the expected format"
+    user, password, server, port, dbname = m.groups()
+    return user, password, server, port, dbname

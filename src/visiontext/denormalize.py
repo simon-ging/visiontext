@@ -4,6 +4,7 @@
 import torch
 import torchvision
 import torchvision.transforms.v2
+
 from packg.log import logger
 
 
@@ -39,16 +40,27 @@ class Denormalize:
         return image_tensor * std + mean
 
     @classmethod
-    def from_transforms(cls, transforms):
+    def from_transforms(cls, transforms, ignore_errors: bool = False):
         mean, std = find_mean_and_std_for_denormalization(transforms)
         if mean is None or std is None:
-            logger.warning(f"Could not find mean and std for denormalization from {transforms=}")
+            err_msg = f"Could not find mean and std for denormalization in {transforms=}"
+            if ignore_errors:
+                logger.warning(err_msg)
+            else:
+                raise ValueError(err_msg)
             mean, std = [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]
         return cls(mean, std)
+
+    def __repr__(self):
+        return f"Denormalize(mean={self.mean}, std={self.std})"
 
 
 def find_mean_and_std_for_denormalization(transforms):
     mean, std = None, None
+
+    # support ViTImageProcessor
+    if hasattr(transforms, "image_mean") and hasattr(transforms, "image_std"):
+        return transforms.image_mean, transforms.image_std
 
     # call recursively if it is a list of transforms
     transform_list = None

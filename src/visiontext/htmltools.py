@@ -1,12 +1,10 @@
-from io import BytesIO
-
 import base64
-
 import io
-
 from IPython.display import display, HTML
 from PIL import Image
+from io import BytesIO
 from matplotlib import pyplot as plt
+from typing import Optional
 
 
 class NotebookHTMLPrinter:
@@ -164,6 +162,23 @@ def get_colored_html_text_from_lists(c_list, t_list, sep=""):
     return full_text
 
 
+def create_html_image_grid(
+    pil_images: list[Image.Image],
+    texts: Optional[list[str]] = None,
+    width: int = 300,
+):
+    pr = NotebookHTMLPrinter()
+    pr.open_grid(max_width=width)
+    for i, pil_image in enumerate(pil_images):
+        if texts is not None:
+            text = texts[i]
+        else:
+            text = ""
+        pr.print(f"<div>{convert_image_to_html(pil_image)}<br>{text}</div>")
+    pr.close_grid()
+    return pr.get_html()
+
+
 def convert_image_to_html(pil_image: Image.Image, addstr: str = "") -> str:
     """
     Usage:
@@ -171,6 +186,7 @@ def convert_image_to_html(pil_image: Image.Image, addstr: str = "") -> str:
 
     Args:
         pil_image: pillow image object
+        addstr: additional string to add to the <img> tag, e.g. "style='width: 50%;'"
 
     Returns:
         Image as embedded html <img> tag string

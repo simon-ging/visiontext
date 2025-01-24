@@ -153,7 +153,7 @@ def compress_files_to_tar(
 ):
     if tar_file.is_file():
         if verify:
-            # todo verify tar and files
+            assert verify_tar(tar_file, base_dir, rel_files), f"Verification failed for {tar_file}"
             return
         return
     # tar does not exist, create the tar
