@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import io
 from IPython.display import display, HTML
