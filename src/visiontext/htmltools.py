@@ -8,6 +8,8 @@ from io import BytesIO
 from matplotlib import pyplot as plt
 from typing import Optional
 
+from visiontext.images import scale_image_to_width, scale_image_to_height
+
 
 class NotebookHTMLPrinter:
     """
@@ -167,16 +169,25 @@ def get_colored_html_text_from_lists(c_list, t_list, sep=""):
 def create_html_image_grid(
     pil_images: list[Image.Image],
     texts: Optional[list[str]] = None,
-    width: int = 300,
+    cell_width: int = 300,
+    cell_height: Optional[int] = 500,
 ):
     pr = NotebookHTMLPrinter()
-    pr.open_grid(max_width=width)
+    pr.open_grid(max_width=cell_width)
     for i, pil_image in enumerate(pil_images):
         if texts is not None:
             text = texts[i]
         else:
             text = ""
+        width, height = pil_image.size
+        if width > cell_width:
+            pil_image = scale_image_to_width(pil_image, 300)
+        width, height = pil_image.size
+        if cell_height is not None and height > cell_height:
+            pil_image = scale_image_to_height(pil_image, 500)
         pr.print(f"<div>{convert_image_to_html(pil_image)}<br>{text}</div>")
+        if i < len(pil_images) - 1:
+            pr.next_grid_column()
     pr.close_grid()
     return pr.get_html()
 

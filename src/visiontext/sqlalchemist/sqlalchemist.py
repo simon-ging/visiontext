@@ -1,9 +1,8 @@
+from collections import defaultdict
+
 import re
-import os
 from copy import deepcopy
 from io import StringIO
-from pathlib import Path
-from sqlalchemy import Engine, create_engine
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import IntegrityError
@@ -11,66 +10,10 @@ from sqlalchemy.orm import (
     InstrumentedAttribute,
     ColumnProperty,
     Session,
-    sessionmaker,
-    DeclarativeBase,
 )
 from sqlalchemy.schema import CreateTable
 
 from packg.log import logger
-
-
-class DBOpener:
-    def __init__(
-        self,
-        db_model,
-        db_url: str = None,
-        sqlite_db_file: str | Path | None = None,
-        engine_kwargs: dict | None = None,
-    ):
-        """
-        Initialize the database manager either with an SQLite file, or any other SQL database URL.
-
-        Args:
-            db_model: DeclarativeBase for sqlalchemy ORM
-            db_url: URL for the database e.g. 'postgresql+psycopg2://user:pw@server:5432/dbname'
-            sqlite_db_file: Path to the SQLite database file instead of a URL
-        """
-        if db_url is not None and sqlite_db_file is not None:
-            raise ValueError(f"Can only provide one of {db_url=} or {sqlite_db_file=}, got both.")
-        if db_url is not None:
-            self.db_url: str = db_url
-            self.sqlite_db_file: Path | None = None
-        elif sqlite_db_file is not None:
-            self.db_url: str = (f"sqlite:///{self.sqlite_db_file.as_posix()}",)
-            self.sqlite_db_file: Path = Path(sqlite_db_file)
-        self.db_model: DeclarativeBase = db_model
-        self.engine_kwargs: dict | None = {} if engine_kwargs is None else engine_kwargs
-        self.engine: Engine = None
-        self.session: Session = None
-
-    def connect(self, create_all: bool = True):
-        """Connect to the SQLite database."""
-        if self.sqlite_db_file is not None and not self.sqlite_db_file.is_file():
-            logger.warning(f"Database file not found, recreating: {self.sqlite_db_file}")
-            os.makedirs(self.sqlite_db_file.parent, exist_ok=True)
-        logger.info(f"Connecting to database: {self.db_url}")
-        self.engine: Engine = create_engine(
-            self.db_url,
-            # connect_args={"check_same_thread": False}
-            **self.engine_kwargs,
-        )
-        self.session: Session = sessionmaker(bind=self.engine)()
-        if create_all:
-            self.db_model.metadata.create_all(self.engine, checkfirst=True)
-
-        # self.connection = sqlite3.connect(self.db_file)
-        # self.connection.row_factory = sqlite3.Row  # This allows us to get rows as dictionaries
-        # self.cursor = self.connection.cursor()
-
-    def close(self):
-        """Close the database connection."""
-        if self.session is not None:
-            self.session.close()
 
 
 def get_orm_class_by_table_name(base, table_name):
@@ -351,3 +294,48 @@ def split_postgresql_db_uri(dburi: str) -> tuple[str, str, str, str, str]:
     assert m is not None, f"DBURI {dburi} does not match the expected format"
     user, password, server, port, dbname = m.groups()
     return user, password, server, port, dbname
+
+
+def get_deletion_order(Base) -> list[str]:
+    """
+    Get the order in which tables should be deleted to avoid foreign key constraint violations.
+
+    Args:
+        Base: declarative_base() object
+
+    Returns:
+        list of table names in the order they should be deleted
+
+    """
+
+    # Get all ORM classes (tables) from Base's metadata
+    orm_classes = list(Base.metadata.sorted_tables)  # Sorted tables in the metadata
+
+    # Build dependencies graph
+    table_dependencies = defaultdict(set)
+    for cls in orm_classes:
+        # Inspect the columns for foreign key relationships
+        for column in cls.columns:
+            if column.foreign_keys:
+                for fk in column.foreign_keys:
+                    referenced_table = fk.column.table
+                    # Add the dependent table to the list of dependencies for the referenced table
+                    table_dependencies[referenced_table].add(cls)
+
+    # Perform a topological sort on the table dependencies
+    visited = set()
+    deletion_order = []
+
+    def visit(cls):
+        if cls not in visited:
+            visited.add(cls)
+            # Recursively visit dependent tables
+            for dependency in table_dependencies[cls]:
+                visit(dependency)
+            deletion_order.append(cls)
+
+    # Start the visitation from all tables
+    for cls in orm_classes:
+        visit(cls)
+
+    return [a.name for a in deletion_order]
