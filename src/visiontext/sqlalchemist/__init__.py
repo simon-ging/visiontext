@@ -11,6 +11,7 @@ from .sqlalchemist import (
     convert_data_types,
     bulk_insert_mappings_ignore_dups_singlethreaded,
     get_deletion_order,
+    pd_read_sql_table,
 )
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "convert_data_types",
     "bulk_insert_mappings_ignore_dups_singlethreaded",
     "get_deletion_order",
+    "pd_read_sql_table",
 ]

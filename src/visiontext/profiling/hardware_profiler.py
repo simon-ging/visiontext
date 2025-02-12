@@ -1,10 +1,9 @@
 import os
-from typing import Optional, List
-
 import psutil
 import pynvml  # pip install nvidia-ml-py
 import torch
 from loguru import logger
+from typing import Optional, List
 
 from packg import format_exception
 
@@ -54,8 +53,12 @@ class GPUProfilerInterface:
         Returns:
             profile string for output
         """
-        names, mem_total, mem_used, load_gpu, load_gpu_mem, temp = self.profile_gpu(gpu_numbers)
         ram_total, ram_used = profile_ram()
+        profile_gpu_output = self.profile_gpu(gpu_numbers)
+        if profile_gpu_output is None:
+            return f"No GPUs detected!RAM {ram_used:.1f}/{ram_total:.1f}"
+
+        names, mem_total, mem_used, load_gpu, load_gpu_mem, temp = profile_gpu_output
         # average / sum over all GPUs
         sum_mem_total: float = sum(mem_total)
         sum_mem_used: float = sum(mem_used)
@@ -147,7 +150,11 @@ class GPUProfilerTorch(GPUProfilerInterface):
         """
         gpu_numbers = self.get_gpu_numbers() if gpu_numbers is None else gpu_numbers
         devices = [f"cuda:{n}" for n in gpu_numbers]
-        props = [torch.cuda.get_device_properties(device) for device in devices]
+        try:
+            props = [torch.cuda.get_device_properties(device) for device in devices]
+        except RuntimeError as e:
+            logger.error(format_exception(e))
+            return None
         mem_total = [p.total_memory / 1024**3 for p in props]
         mem_used = [torch.cuda.max_memory_allocated(device) / 1024**3 for device in devices]
         names = [p.name for p in props]

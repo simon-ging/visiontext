@@ -1,8 +1,10 @@
 from collections import defaultdict
 
+import pandas as pd
 import re
 from copy import deepcopy
 from io import StringIO
+from sqlalchemy import ARRAY
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import IntegrityError
@@ -11,7 +13,9 @@ from sqlalchemy.orm import (
     ColumnProperty,
     Session,
 )
-from sqlalchemy.schema import CreateTable
+from sqlalchemy.schema import CreateTable, Column
+from types import GenericAlias
+from typing import get_args, get_origin
 
 from packg.log import logger
 
@@ -190,8 +194,18 @@ def bulk_insert_mappings_ignore_dups_postgresql(
 
 
 def get_orm_column_types(orm_table_class) -> dict[str, type]:
+    """
+
+    Args:
+        orm_table_class:
+
+    Returns:
+        dict of column -> column type. the column type is either a standard python type like
+        str, int, float or a type annotation like list[str], list[int], list[float]
+
+    """
     field2type = {}
-    supported_types = set((str, int, float))
+    supported_types = set((str, int, float, bool))
     for field, value in orm_table_class.__dict__.items():
         if field.startswith("_"):
             continue
@@ -202,12 +216,21 @@ def get_orm_column_types(orm_table_class) -> dict[str, type]:
         proper: ColumnProperty = value.property
         columns = proper.columns
         assert len(columns) == 1, f"Expected one column for {field} but got {len(columns)}"
-        column = columns[0]
-        column_type = column.type.python_type
-        if column_type not in supported_types:
-            raise ValueError(f"Unsupported type {column_type} for field {field}")
-        field2type[field] = column_type
+        column: Column = columns[0]
+        if isinstance(column.type, ARRAY):
+            array_content = column.type.item_type.python_type
+            field2type[field] = list[array_content]
+        elif column.type.python_type in supported_types:
+            field2type[field] = column.type.python_type
+        else:
+            raise ValueError(f"Unsupported type {column.type} for field {field}")
     return field2type
+
+
+def replace_0x00(x):
+    # avoid postgresql error: ValueError: A string literal cannot contain NUL (0x00)
+    if isinstance(x, str):
+        return x.replace("\x00", " ")
 
 
 def convert_data_types(orm_table_class, data: list[dict], str_replace_0x00: bool = False):
@@ -224,11 +247,25 @@ def convert_data_types(orm_table_class, data: list[dict], str_replace_0x00: bool
             if v is None:
                 continue
             target_type = field2type[k]
-            if not isinstance(v, target_type):
-                v = target_type(v)
-            if str_replace_0x00 and target_type == str:
-                # avoid postgresql error: ValueError: A string literal cannot contain NUL (0x00)
-                v = v.replace("\x00", " ")
+            if isinstance(target_type, GenericAlias) and get_origin(target_type) == list:
+                # convert given a type like list[int]
+                args = get_args(target_type)
+                assert len(args) == 1, f"Expected 1 arg for typed list {target_type} but got {args}"
+                inner_type = args[0]
+                new_list = []
+                for i in v:
+                    if not isinstance(i, inner_type):
+                        i = inner_type(i)
+                    if str_replace_0x00:
+                        i = replace_0x00(i)
+                    new_list.append(i)
+                v = new_list
+            else:
+                # convert a simple type like int, str, float
+                if not isinstance(v, target_type):
+                    v = target_type(v)
+                if str_replace_0x00:
+                    v = replace_0x00(v)
             dnew[k] = v
         new_data.append(dnew)
     return new_data
@@ -339,3 +376,28 @@ def get_deletion_order(Base) -> list[str]:
         visit(cls)
 
     return [a.name for a in deletion_order]
+
+
+def pd_read_sql_table(
+    engine, base, table_name, sort_column: str | None = None, sort_ascending: bool = True
+):
+    table_orm = get_orm_class_by_table_name(base, table_name)
+    df = pd.read_sql(f"SELECT * FROM {table_name}", engine)
+    for column, dtype in get_orm_column_types(table_orm).items():
+        if dtype == int:
+            dtype = "Int64"
+        if dtype == str:
+            dtype = "string"
+        if dtype == list or get_origin(dtype) == list:  # list or list[int] etc.
+            # pandas does not support list of int
+            dtype = "object"
+
+        # print("map", column, "to", dtype)
+        df[column] = df[column].astype(dtype)
+    if sort_column is not None:
+        df.sort_values(sort_column, inplace=True, ascending=sort_ascending)
+        df.reset_index(drop=True, inplace=True)  # sorting only works together with index reset
+        # assert df["index"].tolist() == list(range(df.shape[0])), "index not contiguous"
+        # for i, row in df.iterrows():
+        #     assert i == row["index"], f"{i=} {row['index']=}"
+    return df
