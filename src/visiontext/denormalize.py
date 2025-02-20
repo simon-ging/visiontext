@@ -1,4 +1,5 @@
 """
+Undo the normalization of an image to go from [-1, 1] back to the original range for display.
 """
 
 import torch

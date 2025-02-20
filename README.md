@@ -37,7 +37,7 @@ Utilities for deep learning on multimodal data.
 
 ## Install
 
-Requires `python>=3.8`, requires `pytorch` to be installed already, 
+Requires `python>=3.8`, requires `pytorch` to be installed already,
 see [https://pytorch.org/](https://pytorch.org/)
 
 ```bash

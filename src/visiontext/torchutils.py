@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections import defaultdict
+
+import re
 import torch
 
 
@@ -83,3 +86,50 @@ def count_params(parameters) -> int:
     for v in parameters:
         total += v.numel()
     return total
+
+
+def group_params_and_shapes_for_display(param_names, param_shapes):
+    """
+    Compress parameter names by grouping those that differ only in their first numeric part.
+
+    Args:
+        param_names: List of parameter names
+        param_shapes: List of parameter shapes
+
+    Returns:
+        Tuple of lists (new_compressed_param_names, param_shapes)
+    """
+    groups = defaultdict(list)
+    ungrouped = []
+
+    # For each parameter, find the first number in its name
+    for name, shape in zip(param_names, param_shapes):
+        m = re.search(r"(\d+)", name)
+        if m:
+            # Split param into prefix, the found number, and suffix
+            start, end = m.span(1)
+            prefix = name[:start]
+            number_str = m.group(1)
+            suffix = name[end:]
+            block_number = int(number_str)
+            # Use the shape, prefix, and suffix as the grouping key
+            key = (shape, prefix, suffix)
+            groups[key].append(block_number)
+        else:
+            # If no number is found, leave this parameter ungrouped
+            ungrouped.append((name, shape))
+
+    output = []
+    # Process groups that have a numeric part
+    for (shape, prefix, suffix), nums in groups.items():
+        nums.sort()
+        if len(nums) > 1:
+            # Compress multiple block numbers into a range (min-max)
+            compressed_number = f"[{nums[0]}-{nums[-1]}]"
+        else:
+            compressed_number = str(nums[0])
+        output.append((f"{prefix}{compressed_number}{suffix}", shape))
+
+    # Append any entries that didn't contain a number
+    output.extend(ungrouped)
+    return (list(a) for a in zip(*output))

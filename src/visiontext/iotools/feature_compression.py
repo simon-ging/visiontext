@@ -77,8 +77,13 @@ def decompress_uint8_to_fp32_torch(
         return feat_uint8.float() / 255.0 * (maxs - mins) + mins
     raise ValueError(f"Unknown norm '{norm}', possible values {list(NormsC.values())}")
 
+
 def decompress_uint8_to_torch(
-    feat_uint8: torch.Tensor, mins: torch.Tensor, maxs: torch.Tensor, norm: str = "linear", dtype=torch.float32,
+    feat_uint8: torch.Tensor,
+    mins: torch.Tensor,
+    maxs: torch.Tensor,
+    norm: str = "linear",
+    dtype=torch.float32,
 ) -> torch.Tensor:
     """
     Undo the compression from compress_fp32_to_uint8_torch

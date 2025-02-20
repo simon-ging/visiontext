@@ -26,9 +26,10 @@ class SingleTarLookup:
         index_file: Optional[PathType] = None,
         force_rebuild_index: bool = False,
         worker_id: int = 0,
+        check_stat: bool = True,
     ):
         self.tar_file = Path(tar_file)
-        self.index = get_tar_index(tar_file, index_file, force_rebuild_index)
+        self.index = get_tar_index(tar_file, index_file, force_rebuild_index, check_stat=check_stat)
         self.filenames = list(self.index["files"].keys())
         if len(self.filenames) == 0:
             raise ValueError(f"No files in tar: {tar_file}")
@@ -75,7 +76,10 @@ def get_index_file_for_tar_file(tar_file: PathType) -> Path:
 
 
 def get_tar_index(
-    tar_file: PathType, index_file: Optional[PathType] = None, force: bool = False
+    tar_file: PathType,
+    index_file: Optional[PathType] = None,
+    force: bool = False,
+    check_stat: bool = True,
 ) -> dict[str, any]:
     """
 
@@ -83,6 +87,7 @@ def get_tar_index(
         tar_file: tar file to index
         index_file: where to save the index, default f"{tar_file}.json"
         force: always overwrite the index
+        check_stat: verify tar file size and mtime in the index (default True is slower)
 
     Returns:
         dictionary of
@@ -92,9 +97,11 @@ def get_tar_index(
 
     """
     tar_file = Path(tar_file)
-    assert tar_file.is_file(), f"File not found: {tar_file}"
-    tar_file_stat = tar_file.stat()
-    tar_size, tar_mtime = tar_file_stat.st_size, tar_file_stat.st_mtime
+    tar_size, tar_mtime = None, None
+    if check_stat:
+        assert tar_file.is_file(), f"File not found: {tar_file}"
+        tar_file_stat = tar_file.stat()
+        tar_size, tar_mtime = tar_file_stat.st_size, tar_file_stat.st_mtime
 
     if index_file is None:
         index_file = get_index_file_for_tar_file(tar_file)
@@ -104,12 +111,16 @@ def get_tar_index(
     if not force and index_file.is_file():
         existing_index = load_json(index_file)
         size, mtime = existing_index["size"], existing_index["mtime"]
-        if size == tar_size and mtime == tar_mtime:
+        if not check_stat or (size == tar_size and mtime == tar_mtime):
             # index already exists and is up to date
             return existing_index
 
     # index must be rebuilt
-    fileindex = build_tar_fileindex(tar_file)
+    try:
+        fileindex = build_tar_fileindex(tar_file)
+    except tarfile.ReadError as e:
+        logger.error(f"Failed to read tar file {tar_file}: {format_exception(e)}")
+        raise
     index = {"size": tar_size, "mtime": tar_mtime, "files": fileindex}
     dump_json(index, index_file, verbose=False)
     return index
