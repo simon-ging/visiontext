@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import json
 import os
 import sqlite3
@@ -229,6 +231,29 @@ class TarLookup:
         """
         file_name = self.file_names[idx]
         return self.get_content_from_filename(file_name)
+
+    def get_files_per_shard(self, endswith:str|None=None, sorter:callable=sorted) -> dict[str, List[str]]:
+        """
+        Group files by shard name.
+
+        Args:
+            endswith: to count only e.g. .jpg files
+            sorter: the default sorted is fine for sorting tars named 00000.tar, 00001.tar, ...
+                however if tar filenames do not have leading zeros, set it to natsort.natsorted
+
+        Returns:
+            dict of shardname to list of filenames
+        """
+        self.cursor.execute("SELECT o.file_name, f.file_name, offset, file_size FROM offset_data as o JOIN file_data as f ON o.file_id=f.file_id")
+        fetches = self.cursor.fetchall()
+        shard2fi = defaultdict(list)
+        for filename, shardname, _, _ in fetches:
+            if endswith is not None:
+                if not filename.endswith(endswith):
+                    continue
+            shard2fi[shardname].append(filename)
+
+        return dict(sorter(shard2fi.items(), key=lambda x: x[0]))
 
     def __len__(self):
         return self.n_content_files
