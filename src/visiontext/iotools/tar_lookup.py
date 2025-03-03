@@ -1,3 +1,4 @@
+from __future__ import annotations
 from collections import defaultdict
 
 import json
@@ -6,7 +7,7 @@ import sqlite3
 import time
 from pathlib import Path
 from timeit import default_timer
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Optional
 
 from visiontext.iotools.tar_indexer import index_tar
 from visiontext.distutils import is_main_process, barrier_safe
@@ -232,7 +233,9 @@ class TarLookup:
         file_name = self.file_names[idx]
         return self.get_content_from_filename(file_name)
 
-    def get_files_per_shard(self, endswith:str|None=None, sorter:callable=sorted) -> dict[str, List[str]]:
+    def get_files_per_shard(
+        self, endswith: Optional[str] = None, sorter: callable = sorted
+    ) -> dict[str, List[str]]:
         """
         Group files by shard name.
 
@@ -244,7 +247,9 @@ class TarLookup:
         Returns:
             dict of shardname to list of filenames
         """
-        self.cursor.execute("SELECT o.file_name, f.file_name, offset, file_size FROM offset_data as o JOIN file_data as f ON o.file_id=f.file_id")
+        self.cursor.execute(
+            "SELECT o.file_name, f.file_name, offset, file_size FROM offset_data as o JOIN file_data as f ON o.file_id=f.file_id"
+        )
         fetches = self.cursor.fetchall()
         shard2fi = defaultdict(list)
         for filename, shardname, _, _ in fetches:
