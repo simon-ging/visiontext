@@ -4,6 +4,3 @@ channels:
 dependencies:
   - conda-forge::python=3.12
   - conda-forge::sqlite
-  - pytorch::pytorch
-  - pytorch::torchvision
-  - pytorch::cpuonly

@@ -1,9 +1,6 @@
 # visiontext
 
 <p align="center">
-<a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py38-cpu.yml">
-  <img alt="minimal build 3.8 status" title="build 3.8 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py38-cpu.yml?branch=main&label=minimal%20build%203.8%20cpu" />
-</a>
 <a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py310-cpu.yml">
   <img alt="minimal build 3.10 status" title="build 3.10 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py310-cpu.yml?branch=main&label=minimal%20build%203.10%20cpu" />
 </a>
@@ -11,9 +8,6 @@
   <img alt="minimal build 3.12 status" title="build 3.12 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py312-cpu.yml?branch=main&label=minimal%20build%203.12%20cpu" />
 </a>
 <br />
-<a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py38-cpu.yml">
-  <img alt="full build 3.8 status" title="build 3.8 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py38-cpu-full.yml?branch=main&label=full%20build%203.8%20cpu" />
-</a>
 <a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py310-cpu.yml">
   <img alt="full build 3.10 status" title="build 3.10 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py310-cpu-full.yml?branch=main&label=full%20build%203.10%20cpu" />
 </a>
@@ -37,7 +31,7 @@ Utilities for deep learning on multimodal data.
 
 ## Install
 
-Requires `python>=3.8`, requires `pytorch` to be installed already,
+Requires `python>=3.10`, requires `pytorch` to be installed already,
 see [https://pytorch.org/](https://pytorch.org/)
 
 ```bash
@@ -73,5 +67,7 @@ python -m pytest --cov -m "not full"
 
 ## Changelog
 
+- 0.23.1: Drop python 3.8 support since PyTorch dropped it. Set minimum python version as 3.10.
+  - PyTorch disabled the install via conda, change builds to install PyTorch CPU via pip.
 - 0.10.1: Test with python 3.12
 - 0.8.1: Set minimum python version to 3.8 since PyTorch requires it
