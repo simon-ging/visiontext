@@ -3,7 +3,7 @@ from omegaconf import OmegaConf
 from typedparser.objects import modify_nested_object
 
 
-def load_dotlist(merge_dotlist: list[str]) -> dict:
+def load_dotlist(merge_dotlist: list[str] | None) -> dict:
     """Converts a list of key=value strings into a nested dictionary with dot notation support.
 
     Type conversions: int, float, bool, comma-separated lists, empty values become None.
@@ -14,6 +14,8 @@ def load_dotlist(merge_dotlist: list[str]) -> dict:
     Returns:
         A dictionary with the parsed key-value pairs, with appropriate type conversions.
     """
+    if merge_dotlist is None:
+        return {}
     conf_dotlist = OmegaConf.from_dotlist(merge_dotlist)
     dict_dotlist = OmegaConf.to_container(conf_dotlist, resolve=True)
 

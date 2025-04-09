@@ -1,15 +1,24 @@
+"""
+download a dataset from huggingface.
+
+potentially useful args:
+    -o name=DatasetConfigName
+    -o use_auth_token=True
+    -o split="train"
+"""
+
 from pathlib import Path
 from typing import (
     Optional,
 )
 
 from attrs import define
-from datasets import load_dataset
 from loguru import logger
 
 from packg.log import SHORTEST_FORMAT, configure_logger, get_logger_level_from_args
 from packg.paths import get_data_dir
 from typedparser import VerboseQuietArgs, add_argument, TypedParser
+from visiontext.configutils import load_dotlist
 
 
 @define
@@ -19,6 +28,9 @@ class Args(VerboseQuietArgs):
     )
     dataset_name: str = add_argument(positional=True, type=str, help="Dataset name")
     options: list[str] | None = add_argument(shortcut="-o", action="append", help="dataset kwargs")
+    subdir: str | None = add_argument(
+        shortcut="-s", type=str, help="Subdir (none=auto)", default=None
+    )
 
 
 def main():
@@ -27,14 +39,22 @@ def main():
     configure_logger(level=get_logger_level_from_args(args), format=SHORTEST_FORMAT)
     logger.info(f"{args}")
 
-    dict_dotlist = load_dotlist(args.options)  # TODO ADD TO VISIONTEXT
-    # takes ~26 min
+    dict_dotlist = load_dotlist(args.options)
+    subdir = args.subdir
+    if subdir is None:
+        subdir = args.dataset_name.replace("/", "__")
+
+    logger.info(f"Downloading dataset {args.dataset_name} to {args.base_dir / subdir}")
+    try:
+        from datasets import load_dataset
+    except ImportError as e:
+        logger.error(f"datasets is not installed. Please install it with `pip install datasets`.")
+        raise e
     dataset = load_dataset(
         args.dataset_name,
-        use_auth_token=True,  # required
         streaming=False,  # this downloads to disk
-        split="train",
-        cache_dir=(args.base_dir / "huggingface-en-2301").as_posix(),
+        cache_dir=(args.base_dir / subdir).as_posix(),
+        **dict_dotlist,
     )
 
 

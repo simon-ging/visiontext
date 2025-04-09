@@ -62,6 +62,11 @@ def test_float_values():
     assert result == {"key1": 1.5, "key2": 0.0, "key3": -3.14, "key4": 1e-10}
 
 
+def test_none_input():
+    result = load_dotlist(None)
+    assert result == {}
+
+
 def test_multiple_nested_with_lists():
     dotlist = ["parent.child1=value1,value2", "parent.child2=1,2,3", "parent.child3=value"]
     result = load_dotlist(dotlist)
