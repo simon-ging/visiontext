@@ -15,15 +15,17 @@ nvidia-ml-py  # gpu profiling
 psutil  # ram/cpu profiling
 h5py
 pillow
+omegaconf
 
-# # html / xml
-# beautifulsoup4
-# lxml
 termcolor
 
 chardet
-spacy;python_version>'3.8'  # spacy is not supported on python 3.8
+spacy
 lmdb
 msgpack
 
 pydub  # audio processing
+
+# # html / xml
+# beautifulsoup4
+# lxml
