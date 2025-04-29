@@ -8,7 +8,7 @@ import pytest
 from PIL import Image
 
 from packg.iotools import dump_json, load_json
-from visiontext.iotools.simple_tar_index import (
+from visiontext.iotools.single_tar_lookup import (
     build_tar_fileindex,
     get_tar_index,
     get_index_file_for_tar_file,

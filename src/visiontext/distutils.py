@@ -19,6 +19,7 @@ import multiprocessing
 import os
 from deprecated import deprecated
 from multiprocessing.process import BaseProcess
+from packg.log import logger
 
 
 class WorldInfo:
@@ -134,3 +135,24 @@ def barrier_safe():
 
 def is_distributed():
     return "WORLD_SIZE" in os.environ and get_world_size() > 1
+
+
+def get_torch_worker_id():
+    from torch.utils.data import get_worker_info
+
+    worker_id = get_worker_info()
+    worker_id = worker_id.id if worker_id else -1
+    return worker_id
+
+
+def get_dataloader_num_workers(dataloader) -> int:
+    try:
+        return int(dataloader.num_workers)
+    except AttributeError:
+        pass
+    try:
+        return int(dataloader.workers)
+    except AttributeError:
+        pass
+    logger.error(f"Cannot determine number of workers from {dataloader}")
+    return 0

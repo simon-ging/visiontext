@@ -6,6 +6,15 @@ import re
 import torch
 
 
+def get_statedict_mean_std(statedict):
+    all_v = []
+    for k, v in statedict.items():
+        v_flat = v.flatten()
+        all_v.append(v_flat)
+    all_v = torch.cat(all_v)
+    return all_v.mean().item(), all_v.std().item(), all_v
+
+
 def compare_statedicts(
     sd1: dict[str, torch.Tensor],
     sd2: dict[str, torch.Tensor],
