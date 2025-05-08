@@ -1,7 +1,8 @@
 """
 Webdataset extension where jpeg images are in a tar file,
-and all metadata information is in a json file with the same name.
-This makes it easier to update or read the metadata later, since it is not stuck in the tar file.
+and metadata information is in a separate json file with the same name.
+
+This makes it easier to update or read the metadata later, since it is not sitting in a tar file.
 
 pipeline is:
 - SimpleShardList

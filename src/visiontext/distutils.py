@@ -121,8 +121,7 @@ def print_with_rank(*args, **kwargs):
 
 
 def is_main_process():
-    rank, _world_size = get_world_info()
-    return rank == 0
+    return get_global_rank() == 0
 
 
 def barrier_safe():
@@ -156,3 +155,15 @@ def get_dataloader_num_workers(dataloader) -> int:
         pass
     logger.error(f"Cannot determine number of workers from {dataloader}")
     return 0
+
+
+def dist_breakpoint(target_rank=0):
+    rank, world_size = get_world_info()
+    print(
+        f"Distributed breakpoint {rank}/{world_size}, {target_rank} will breakpoint, others will wait. "
+        f"There is no way to safely continue this process so just kill it and restart."
+    )
+    if rank == target_rank:
+        breakpoint()
+        return
+    barrier_safe()

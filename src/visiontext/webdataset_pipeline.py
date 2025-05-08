@@ -1,4 +1,8 @@
-"""Code adapted from openclip/training/data.py and the webdataset package"""
+"""
+Utilities to build a webdataset pipeline.
+
+Code adapted from openclip/training/data.py and the webdataset package
+"""
 
 import logging
 import random
