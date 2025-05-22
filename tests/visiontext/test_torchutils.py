@@ -1,4 +1,7 @@
-from visiontext.torchutils import group_params_and_shapes_for_display
+import torch
+from pathlib import Path
+import visiontext.testdata
+from visiontext.torchutils import group_params_and_shapes_for_display, show_param_groups_dict
 
 example_data = [
     ((2048,), "transformer.resblocks.10.mlp.c_fc.bias"),
@@ -100,3 +103,18 @@ def test_format_named_params():
     ret_names, ret_shapes = group_params_and_shapes_for_display(names, shapes)
     assert ret_names == out_names
     assert ret_shapes == out_shapes
+
+
+def test_show_param_groups_dict():
+    named_params_dict = torch.load(
+        Path(visiontext.testdata.__file__).parent / "example_weights.pth"
+    )
+    param_groups_dict = {
+        "all": {
+            "param_names": list(named_params_dict.keys()),
+            "params": list(named_params_dict.values()),
+            "weight_decay": 0.01,
+            "lr": 0.001,
+        }
+    }
+    show_param_groups_dict(param_groups_dict)

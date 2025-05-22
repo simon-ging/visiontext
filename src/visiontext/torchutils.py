@@ -5,6 +5,8 @@ from collections import defaultdict
 import re
 import torch
 
+from natsort import natsorted
+import numpy as np
 
 def get_statedict_mean_std(statedict):
     all_v = []
@@ -142,3 +144,43 @@ def group_params_and_shapes_for_display(param_names, param_shapes):
     # Append any entries that didn't contain a number
     output.extend(ungrouped)
     return (list(a) for a in zip(*output))
+
+
+def show_param_groups_dict(param_groups_dict, print_fn=print):
+    """
+    Print a table of parameter groups with their names, shapes, and number of parameters.
+
+    Input format must be parameter groups, each group containing at least params and param_names:
+    {
+        "group_name": {
+            "params": list[torch.Tensor],
+            "param_names": list[str],
+            "weight_decay": float,  # optional
+            "lr": float,  # optional
+        }
+    }
+    """
+    n_params_total = 0
+    sorted_group_keys = sorted(param_groups_dict.keys())
+    for group_name in sorted_group_keys:
+        group_content = param_groups_dict[group_name]
+        params = group_content["params"]
+        param_names = group_content["param_names"]
+        wd = group_content.get("weight_decay", 0.0)
+        lr = group_content.get("lr", 0.0)
+        print_fn(f"{group_name:20s} {lr=:7.1e} {wd=:7.1e}")
+        param_dict = {param_name: param for param_name, param in zip(param_names, params)}
+        param_shapes = []
+        group_n_params = 0
+        for param_name, param in natsorted(param_dict.items(), key=lambda x: x[0]):
+            param_shape = tuple(param.shape)
+            param_shapes.append(param_shape)
+            n_params = np.prod(param_shape)
+            group_n_params += n_params
+        new_names, new_shapes = group_params_and_shapes_for_display(param_names, param_shapes)
+        for param_name, param_shape in zip(new_names, new_shapes):
+            print_fn(f"    {str(param_shape):20s} {param_name}")
+        print_fn(f"    Total parameters in group: {int(group_n_params):_d}")
+        n_params_total += group_n_params
+        print_fn("")
+    print_fn(f"Total parameters across all groups: {int(n_params_total):_d}")
