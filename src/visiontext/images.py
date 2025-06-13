@@ -25,24 +25,22 @@ Examples:
 """
 
 from __future__ import annotations
-import textwrap
+
 import io
-import numpy as np
 import os
-import torch
-import matplotlib.pyplot as plt
-from PIL import Image, ImageFont, ImageDraw
-from PIL.Image import Image as PILImage, Resampling
 from dataclasses import dataclass
 from tempfile import NamedTemporaryFile
 from typing import Union, Optional, List
+
+import numpy as np
+import torch
 import torchvision.transforms.functional as transforms_functional
+from PIL import Image, ImageDraw
+from PIL.Image import Image as PILImage, Resampling
+
 from packg import format_exception
 from packg.constclass import Const
-
-import os
-import urllib.request
-from PIL import ImageFont
+from visiontext.font import get_notosans_font
 
 
 class SamplingConst:
@@ -553,7 +551,7 @@ def visualize_image_text_pairs_from_tensor(image_tensor, texts, font_size=12) ->
         width, height = pil_image.size
         caption_text = texts[i]
         # font = ImageFont.load_default(size=font_size)  # doesn't have ä
-        font = get_noto_sans(font_size)
+        font = get_notosans_font(font_size)
         padding = 6
         line_spacing = 4
 
