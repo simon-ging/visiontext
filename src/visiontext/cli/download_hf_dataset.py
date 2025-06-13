@@ -8,23 +8,20 @@ potentially useful args:
 """
 
 from pathlib import Path
-from typing import (
-    Optional,
-)
 
 from attrs import define
 from loguru import logger
 
 from packg.log import SHORTEST_FORMAT, configure_logger, get_logger_level_from_args
-from packg.paths import get_data_dir
+from packg.paths import get_packg_data_dir
 from typedparser import VerboseQuietArgs, add_argument, TypedParser
 from visiontext.configutils import load_dotlist
 
 
 @define
 class Args(VerboseQuietArgs):
-    base_dir: Optional[Path] = add_argument(
-        shortcut="-d", type=str, help="Base dir", default=get_data_dir()
+    base_dir: Path | None = add_argument(
+        shortcut="-d", type=str, help="Base dir", default=get_packg_data_dir()
     )
     dataset_name: str = add_argument(positional=True, type=str, help="Dataset name")
     options: list[str] | None = add_argument(shortcut="-o", action="append", help="dataset kwargs")

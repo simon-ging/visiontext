@@ -1,13 +1,16 @@
+from __future__ import annotations
+
 import os
-import requests
 import shutil
+import urllib.request
 import zipfile
+
+import requests
 from PIL import ImageFont
+from platformdirs import user_cache_path
 
-from packg.paths import get_cache_dir
 
-
-def get_font_path_dejavusans() -> str:
+def get_dejavusans_font_path() -> str:
     """
     Find font path of DejaVuSans.ttf or download it to cache folder
 
@@ -34,7 +37,7 @@ def get_font_path_dejavusans() -> str:
 
     response.raise_for_status()  # Check if the download was successful
 
-    font_dir = get_cache_dir() / "fonts"
+    font_dir = user_cache_path("python_visiontext") / "fonts"
     font_dir_temp = font_dir / "dejavusans"
     font_archive = font_dir_temp / "archive.zip"
 
@@ -53,8 +56,29 @@ def get_font_path_dejavusans() -> str:
     return ttf_dst.as_posix()
 
 
+def get_dejavusans_font(font_size: int):
+    font_path = get_dejavusans_font_path()
+    return ImageFont.truetype(font_path, size=font_size)
+
+
+def get_notosans_font_path() -> str:
+    font_url = "https://github.com/googlefonts/noto-fonts/blob/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf?raw=true"
+    font_path = user_cache_path("python_visiontext") / "fonts" / "NotoSans-Regular.ttf"
+    os.makedirs(os.path.dirname(font_path), exist_ok=True)
+
+    if not os.path.isfile(font_path):
+        print(f"Downloading Noto Sans font... If this breaks, make sure that {font_path} exists")
+        urllib.request.urlretrieve(font_url, font_path)
+    return font_path.as_posix()
+
+
+def get_notosans_font(font_size: int):
+    font_path = get_notosans_font_path()
+    return ImageFont.truetype(font_path, size=font_size)
+
+
 def main():
-    print(get_font_path_dejavusans())
+    print(get_dejavusans_font_path())
 
 
 if __name__ == "__main__":

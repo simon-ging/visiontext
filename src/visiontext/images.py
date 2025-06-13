@@ -25,19 +25,24 @@ Examples:
 """
 
 from __future__ import annotations
-
+import textwrap
 import io
 import numpy as np
 import os
 import torch
-from PIL import Image
+import matplotlib.pyplot as plt
+from PIL import Image, ImageFont, ImageDraw
 from PIL.Image import Image as PILImage, Resampling
 from dataclasses import dataclass
 from tempfile import NamedTemporaryFile
-from typing import Union, Optional
-
+from typing import Union, Optional, List
+import torchvision.transforms.functional as transforms_functional
 from packg import format_exception
 from packg.constclass import Const
+
+import os
+import urllib.request
+from PIL import ImageFont
 
 
 class SamplingConst:
@@ -526,3 +531,67 @@ def display_image_using_kitten_icat(image: Image.Image):
     tempf.close()
     os.system(f'kitten icat "{tempf.name}"')
     os.unlink(tempf.name)
+
+
+def visualize_image_text_pairs_from_tensor(image_tensor, texts, font_size=12) -> List[PILImage]:
+    # make sure we have a (B, C, H, W) tensor and a (B,) list of texts
+    if image_tensor.ndim == 3:
+        image_tensor = image_tensor.unsqueeze(0)
+    if isinstance(texts, str):
+        texts = [texts]
+    n_images = image_tensor.shape[0]
+    assert n_images == len(
+        texts
+    ), f"Number of images {n_images} does not match number of texts {len(texts)}"
+
+    pil_images = []
+    for i in range(n_images):
+        # Convert tensor to PIL image
+        img_tensor = image_tensor[i].detach().cpu()
+        pil_image = transforms_functional.to_pil_image(img_tensor)
+
+        width, height = pil_image.size
+        caption_text = texts[i]
+        # font = ImageFont.load_default(size=font_size)  # doesn't have ä
+        font = get_noto_sans(font_size)
+        padding = 6
+        line_spacing = 4
+
+        # Word-wrapping based on pixel width
+        words = caption_text.split()
+        lines = []
+        current_line = ""
+        draw = ImageDraw.Draw(pil_image)
+        for word in words:
+            test_line = f"{current_line} {word}".strip()
+            if draw.textlength(test_line, font=font) <= width - padding * 2:
+                current_line = test_line
+            else:
+                if current_line:
+                    lines.append(current_line)
+                current_line = word
+        if current_line:
+            lines.append(current_line)
+
+        # Measure total height of wrapped text
+        line_height = font.getbbox("A")[3] - font.getbbox("A")[1]
+        caption_height = len(lines) * (line_height + line_spacing) + padding
+
+        # Create caption image
+        caption_image = Image.new("RGB", (width, caption_height), color=(255, 255, 255))
+        draw = ImageDraw.Draw(caption_image)
+
+        y = padding // 2
+        for line in lines:
+            line_width = draw.textlength(line, font=font)
+            x = (width - line_width) // 2
+            draw.text((x, y), line, fill=(0, 0, 0), font=font)
+            y += line_height + line_spacing
+
+        # Concatenate image and caption
+        combined_image = Image.new("RGB", (width, height + caption_height), color=(255, 255, 255))
+        combined_image.paste(pil_image, (0, 0))
+        combined_image.paste(caption_image, (0, height))
+
+        pil_images.append(combined_image)
+    return pil_images

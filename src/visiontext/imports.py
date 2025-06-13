@@ -56,7 +56,7 @@ from packg import format_exception
 from packg.iotools.jsonext import load_json, dump_json, loads_json, dumps_json
 from packg.log import configure_logger
 from packg.magic import reload_recursive
-from packg.paths import get_cache_dir, get_data_dir
+from packg.paths import get_packg_data_dir, get_packg_cache_dir
 from packg.strings import b64_encode_from_bytes
 from packg.tqdmext import tqdm_max_ncols
 from typedparser.objects import invert_dict_of_dict, flatten_dict
@@ -100,8 +100,8 @@ __all__ = [
     "flatten_dict",
     "format_exception",
     "full_pandas_display",
-    "get_cache_dir",
-    "get_data_dir",
+    "get_packg_cache_dir",
+    "get_packg_data_dir",
     "hashlib",
     "invert_dict_of_dict",
     "io",

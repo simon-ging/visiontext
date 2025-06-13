@@ -3,7 +3,7 @@ from matplotlib import colors as mpl_colors
 from typing import Dict, List, Tuple, Optional, Union
 
 from packg.maths import clip_rectangle_coords
-from visiontext.font import get_font_path_dejavusans
+from visiontext.font import get_dejavusans_font_path
 from visiontext.colormaps import (
     create_colormap_for_dark_background,
     create_colorgetter_from_colormap,
@@ -203,7 +203,7 @@ def draw_bounding_boxes_pil(
     cmap: Optional[Union[str, mpl_colors.Colormap]] = None,
 ):
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(get_font_path_dejavusans(), font_size)
+    font = ImageFont.truetype(get_dejavusans_font_path(), font_size)
 
     if colors is None:
         if cmap is None:

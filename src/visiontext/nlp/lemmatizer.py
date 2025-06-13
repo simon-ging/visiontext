@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import datetime
-import h5py
 import os
+from pathlib import Path
+
+import h5py
 from attr import define, field
 from loguru import logger
-from pathlib import Path
+from platformdirs import user_cache_path
 from spacy import Language
 
-from packg.paths import get_data_dir
 from packg.strings import quote_with_urlparse
 from visiontext.nlp.spacytools import maybe_download_spacy_model, SPACY_DEFAULT_EN
 
@@ -74,11 +75,15 @@ class LemmatizerDbWrapper(LemmatizerInterface):
     lemmatizer: LemmatizerInterface
     compute_missing: bool = True
     save_to_db: bool = True
+    cache_dir: Path = None
     h5_file: Path = None
 
     def __attrs_post_init__(self):
+        self.cache_dir = (
+            user_cache_path("python_visiontext") if self.cache_dir is None else self.cache_dir
+        )
         self.h5_file = (
-            get_data_dir() / f"text_embeddings/lemmas/{self.lemmatizer.get_unique_name()}"
+            self.cache_dir / f"lemmas/{self.lemmatizer.get_unique_name()}"
             if self.h5_file is None
             else self.h5_file
         )

@@ -115,7 +115,7 @@ def print_main(*args, **kwargs):
 
 
 def print_with_rank(*args, **kwargs):
-    rank = get_rank()
+    rank = get_global_rank()
     world_size = get_world_size()
     print(f"Rank {rank:>2d}/{world_size}:", *args, **kwargs)
 

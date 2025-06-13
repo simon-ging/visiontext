@@ -4,7 +4,8 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from packg.paths import get_cache_dir
+from platformdirs import user_cache_path
+
 from packg.strings import hash_object
 from packg.typext import PathType
 
@@ -26,7 +27,7 @@ class CachePlugin:
         verbose: bool = False,
     ):
         if cache_dir is None:
-            cache_dir = get_cache_dir()
+            cache_dir = user_cache_path("python_visiontext")
         if cache_kwargs is None:
             kwargs_str = "none"
         else:
