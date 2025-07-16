@@ -300,7 +300,7 @@ class PILImageScaler:
     """
     Scale an image using PIL.
 
-    todo in a new version set the default to return pillow and
+    TODO in a new version set the default to return pillow and
         return_type as enum with pillow, uint8, fp32
     """
 

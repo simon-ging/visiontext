@@ -1,4 +1,4 @@
-# todo tests supports both string and the default pil stuff
+# TODO tests supports both string and the default pil stuff
 
 import pytest
 from PIL import Image

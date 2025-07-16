@@ -87,6 +87,7 @@ class TarLookup:
             if is_main_process():
                 os.makedirs(base_path, exist_ok=True)
                 os.makedirs(index_file.parent, exist_ok=True)
+                connection, cursor = get_cursor(index_file)
                 if sort_tar_files:
                     tar_files_rel = sorted(tar_files_rel)
                 for i, tar_file_rel in enumerate(tar_files_rel):
@@ -106,20 +107,16 @@ class TarLookup:
                             f"Indexing file {i}/{len(tar_files_rel)} dir {base_path} "
                             f"filename {tar_file_rel} to {index_file}"
                         )
-                    # create sqlite index
-                    index_tar(base_path, tar_file_rel, index_file, verbose=verbose)
+                    index_tar(base_path, tar_file_rel, cursor, verbose=verbose)
+                connection.close()
             barrier_safe()
 
-        # connect to database and load content
         try:
             connection = sqlite3.connect(str(index_file), check_same_thread=False)
         except sqlite3.OperationalError as e:
-            print(f"Could not load {index_file}.")
-            raise e
+            raise RuntimeError(f"Could not load {index_file}.") from e
         cursor = connection.cursor()
-
         t1 = default_timer()
-
         # how many tarfiles are stored in the index?
         # fields in file_data are (file_id, file_name, mtime)
         # here file_id and file_name are referring to the tar files themselves
@@ -279,12 +276,8 @@ class TarLookup:
         return self.n_content_files
 
 
-def index_tar(base_path, tarfn, indexfn, verbose=True, sleep_duration=5):
+def index_tar(base_path, tarfn, cursor, verbose=True, sleep_duration=0.1):
     """Index tar file and create sqlite index."""
-    if verbose:
-        print(f"Indexing tarfile {base_path} / {tarfn} to {indexfn}")
-    if not indexfn:
-        raise ValueError(f"Index missing {indexfn}")
     # get archive size
     tarfn_str = str(tarfn)
     tarfn_full = Path(base_path) / tarfn
@@ -292,8 +285,7 @@ def index_tar(base_path, tarfn, indexfn, verbose=True, sleep_duration=5):
         raise FileNotFoundError(f"File not found: {tarfn_full}")
     tarsize = os.path.getsize(tarfn_full)
     # prepare db
-    cur = get_cursor(indexfn)
-    file_id = prepare_db(base_path, cur, tarfn_str, verbose)
+    file_id = prepare_db(base_path, cursor, tarfn_str, verbose)
     if not file_id:
         return
     tar = tarfile.open(tarfn_full)
@@ -307,7 +299,7 @@ def index_tar(base_path, tarfn, indexfn, verbose=True, sleep_duration=5):
         n_files += 1
         # upload
         if i % 100 == 0:
-            cur.executemany("INSERT INTO offset_data VALUES (?, ?, ?, ?)", data)
+            cursor.executemany("INSERT INTO offset_data VALUES (?, ?, ?, ?)", data)
             if verbose:
                 print(f" {i} [{tarinfo.offset_data / tarsize:.2%}]      ", end="\r")
             # free ram...
@@ -316,10 +308,10 @@ def index_tar(base_path, tarfn, indexfn, verbose=True, sleep_duration=5):
         i += 1
     # upload last batch
     if len(data) > 0:
-        cur.executemany("INSERT INTO offset_data VALUES (?, ?, ?, ?)", data)
+        cursor.executemany("INSERT INTO offset_data VALUES (?, ?, ?, ?)", data)
     # finally commit changes
-    cur.connection.commit()
-    print(f"Wrote {n_files} files to {indexfn}. Sleep {sleep_duration}s to let the DB work...")
+    cursor.connection.commit()
+    print(f"Wrote {n_files} files. Sleeping {sleep_duration}s to let the DB work...")
     time.sleep(sleep_duration)
 
 
@@ -347,7 +339,7 @@ def get_cursor(indexfn):
         )  # ,PRIMARY KEY (file_id, file_name))
         cur.execute("CREATE INDEX offset_data_file_id ON offset_data (file_id)")
         cur.execute("CREATE INDEX offset_data_file_name ON offset_data (file_name)")
-    return cur
+    return cnx, cur
 
 
 def prepare_db(base_path, cur, tarfn_str, verbose):

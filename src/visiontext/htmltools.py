@@ -18,7 +18,7 @@ class NotebookHTMLPrinter:
     This is better than calling display(HTML(...))) separately for each line because it allows
     for things to stay inside one output cell.
 
-    todo add option to add style to invdividual tr and td
+    TODO add option to add style to invdividual tr and td
 
     Usage:
         pr = NotebookHTMLPrinter()
@@ -75,7 +75,7 @@ class NotebookHTMLPrinter:
     def close_table(self, output=True):
         self.print(f"</table>", output=output, end="")
 
-    def open_grid(self, max_width=300, box_css="display: flex;", col_css=""):
+    def open_grid(self, max_width=300, box_css="display: flex; flex-wrap: wrap;", col_css=""):
         """Start creating a flexbox grid to output several HTML contents side by side"""
         self.grid_max_width = max_width
         self.print(f"<div style='{box_css}'>", end="")
@@ -84,7 +84,7 @@ class NotebookHTMLPrinter:
     def _open_grid_column(self, col_css=""):
         width_css = ""
         if self.grid_max_width is not None:
-            width_css = f"max-width:{self.grid_max_width}px;"
+            width_css = f"width:{self.grid_max_width}; max-width:{self.grid_max_width}px;"
         self.print(f"<div style='margin-right:10px;{width_css} {col_css}'>", end="")
 
     def _close_grid_column(self):
@@ -185,7 +185,9 @@ def create_html_image_grid(
         width, height = pil_image.size
         if cell_height is not None and height > cell_height:
             pil_image = scale_image_to_height(pil_image, 500)
-        pr.print(f"<div>{convert_image_to_html(pil_image)}<br>{text}</div>")
+        # img_tag_options = f"style='width:{cell_width}px; height:{cell_height}px; object-fit:cover;'"
+        img_tag_options = f""
+        pr.print(f"<div>{convert_image_to_html(pil_image, addstr=img_tag_options)}<br>{text}</div>")
         if i < len(pil_images) - 1:
             pr.next_grid_column()
     pr.close_grid()
@@ -218,7 +220,7 @@ def convert_image_to_html(pil_image: Image.Image, addstr: str = "") -> str:
 
 
 def convert_figure_to_base64(fig=plt):
-    # todo test this if fig is actually not plt
+    # TODO test this if fig is actually not plt
     img = BytesIO()
     fig.savefig(img, format="png")
     img.seek(0)
