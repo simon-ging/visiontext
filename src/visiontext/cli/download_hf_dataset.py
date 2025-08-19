@@ -14,7 +14,7 @@ from loguru import logger
 
 from packg.log import SHORTEST_FORMAT, configure_logger, get_logger_level_from_args
 from packg.paths import get_packg_data_dir
-from typedparser import VerboseQuietArgs, add_argument, TypedParser
+from typedparser import TypedParser, VerboseQuietArgs, add_argument
 from visiontext.configutils import load_dotlist
 
 

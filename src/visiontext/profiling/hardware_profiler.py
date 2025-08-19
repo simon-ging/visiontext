@@ -1,9 +1,10 @@
 import os
+from typing import List, Optional
+
 import psutil
 import pynvml  # pip install nvidia-ml-py
 import torch
 from loguru import logger
-from typing import Optional, List
 
 from packg import format_exception
 

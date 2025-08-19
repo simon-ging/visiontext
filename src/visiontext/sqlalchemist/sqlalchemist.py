@@ -1,21 +1,17 @@
-from collections import defaultdict
-
-import pandas as pd
 import re
+from collections import defaultdict
 from copy import deepcopy
 from io import StringIO
+from types import GenericAlias
+from typing import get_args, get_origin
+
+import pandas as pd
 from sqlalchemy import ARRAY
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import (
-    InstrumentedAttribute,
-    ColumnProperty,
-    Session,
-)
-from sqlalchemy.schema import CreateTable, Column
-from types import GenericAlias
-from typing import get_args, get_origin
+from sqlalchemy.orm import ColumnProperty, InstrumentedAttribute, Session
+from sqlalchemy.schema import Column, CreateTable
 
 from packg.log import logger
 
@@ -273,6 +269,7 @@ def convert_data_types(orm_table_class, data: list[dict], str_replace_0x00: bool
 
 def _migrate_sqlite_to_postgresql_example():
     import sqlite3
+
     import pandas as pd
 
     # 1. connect to sqlite

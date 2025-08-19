@@ -30,13 +30,14 @@ import io
 import os
 from dataclasses import dataclass
 from tempfile import NamedTemporaryFile
-from typing import Union, Optional, List
+from typing import List, Optional, Union
 
 import numpy as np
 import torch
 import torchvision.transforms.functional as transforms_functional
 from PIL import Image, ImageDraw
-from PIL.Image import Image as PILImage, Resampling
+from PIL.Image import Image as PILImage
+from PIL.Image import Resampling
 
 from packg import format_exception
 from packg.constclass import Const
@@ -265,8 +266,8 @@ def encode_jpeg(
         np_arr.save(bio, format="JPEG", quality=quality)
         return bio.getvalue()
     if method == JPEGDecoderConst.LIBTURBOJPEG_DEFAULT:
-        import turbojpeg
         import cv2
+        import turbojpeg
 
         np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
         encoded_arr = _jpeg_getter.get().encode(
@@ -274,8 +275,8 @@ def encode_jpeg(
         )
         return encoded_arr
     if method == JPEGDecoderConst.LIBTURBOJPEG_FASTEST:
-        import turbojpeg
         import cv2
+        import turbojpeg
 
         np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
         encoded_arr = _jpeg_getter.get().encode(

@@ -17,8 +17,10 @@ from __future__ import annotations
 
 import multiprocessing
 import os
-from deprecated import deprecated
 from multiprocessing.process import BaseProcess
+
+from deprecated import deprecated
+
 from packg.log import logger
 
 

@@ -9,12 +9,13 @@ instead of relying on dataset selects.
 from __future__ import annotations
 
 import tarfile
-from natsort import natsorted
 from pathlib import Path
 from typing import Optional
 
+from natsort import natsorted
+
 from packg import format_exception
-from packg.iotools import load_json, dump_json
+from packg.iotools import dump_json, load_json
 from packg.log import logger
 from packg.typext import PathType
 

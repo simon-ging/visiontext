@@ -1,7 +1,8 @@
 import math
+from typing import List, Optional, Tuple, Union
+
 import numpy as np
 import torch
-from typing import Optional, Union, Tuple, List
 
 from packg.maths import np_round_half_down
 

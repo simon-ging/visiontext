@@ -3,9 +3,13 @@ Color utilities for matplotlib and jupyter notebook
 """
 
 from dataclasses import dataclass
-from matplotlib import colorbar as mpl_colorbar, colors as mpl_colors, pyplot as plt, cm as mpl_cm
+from typing import Tuple, Union
+
+from matplotlib import cm as mpl_cm
+from matplotlib import colorbar as mpl_colorbar
+from matplotlib import colors as mpl_colors
+from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from typing import Union, Tuple
 
 redgreen_bright = mpl_colors.LinearSegmentedColormap.from_list(
     "rwg", [[1.0, 0.7, 0.7], [1.0, 1.0, 1.0], [0.7, 1.0, 0.7]]

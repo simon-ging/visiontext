@@ -2,12 +2,14 @@
 Compute spectrogram of an audio file.
 """
 
+from pathlib import Path
+
 from attrs import define
 from loguru import logger
+
 from packg.log import SHORTEST_FORMAT, configure_logger, get_logger_level_from_args
-from pathlib import Path
-from typedparser import VerboseQuietArgs, add_argument, TypedParser
-from visiontext.audiotools import load_audio_file, AudioConvertC, check_audio_quality
+from typedparser import TypedParser, VerboseQuietArgs, add_argument
+from visiontext.audiotools import AudioConvertC, check_audio_quality, load_audio_file
 
 
 @define

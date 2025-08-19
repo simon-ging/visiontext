@@ -12,10 +12,10 @@ from multiprocessing import Value
 import webdataset as wds
 from loguru import logger
 from torch.utils.data import get_worker_info
-from webdataset.filters import default_collation_fn, _shuffle  # noqa
+from webdataset.filters import _shuffle, default_collation_fn  # noqa
 
 from typedparser.objects import repr_value
-from visiontext.distutils import get_global_rank, print_with_rank, get_torch_worker_id
+from visiontext.distutils import get_global_rank, get_torch_worker_id, print_with_rank
 
 SHARD_SHUFFLE_SIZE = 2000
 SHARD_SHUFFLE_INITIAL = 500

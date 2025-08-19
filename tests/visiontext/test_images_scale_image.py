@@ -3,7 +3,7 @@
 import pytest
 from PIL import Image
 
-from visiontext.images import PILImageScaler, open_image_scaled, SamplingMapPIL
+from visiontext.images import PILImageScaler, SamplingMapPIL, open_image_scaled
 
 
 # Create a function to generate a small sample image and save it to a temporary path

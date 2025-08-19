@@ -4,11 +4,11 @@ import numpy as np
 import torch
 
 from visiontext.iotools.feature_compression import (
+    NormsC,
     compress_fp32_to_uint8_numpy,
-    decompress_uint8_to_fp32_torch,
     compress_fp32_to_uint8_torch,
     decompress_uint8_to_fp32_numpy,
-    NormsC,
+    decompress_uint8_to_fp32_torch,
 )
 
 

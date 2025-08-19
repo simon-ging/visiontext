@@ -23,9 +23,9 @@ import time
 from collections import defaultdict
 from pathlib import Path
 from timeit import default_timer
-from typing import List, Tuple, Union, Optional
+from typing import List, Optional, Tuple, Union
 
-from visiontext.distutils import is_main_process, barrier_safe
+from visiontext.distutils import barrier_safe, is_main_process
 
 
 class TarLookup:

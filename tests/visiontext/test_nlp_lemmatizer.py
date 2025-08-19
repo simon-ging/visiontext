@@ -5,6 +5,7 @@ spacy does not support python 3.8 so we only run these tests when using the "ful
 import sys
 
 import pytest
+
 from visiontext.nlp.lemmatizer import get_lemmatizer
 
 input_sentence = "The dogs are running up and down the hills. ßßß"

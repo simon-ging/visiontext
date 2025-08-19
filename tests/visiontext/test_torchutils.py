@@ -1,5 +1,7 @@
-import torch
 from pathlib import Path
+
+import torch
+
 import visiontext.testdata
 from visiontext.torchutils import group_params_and_shapes_for_display, show_param_groups_dict
 

@@ -1,12 +1,11 @@
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 
-import re
-import torch
-
-from natsort import natsorted
 import numpy as np
+import torch
+from natsort import natsorted
 
 
 def get_statedict_mean_std(statedict):

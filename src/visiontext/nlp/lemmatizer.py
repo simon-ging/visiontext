@@ -11,7 +11,7 @@ from platformdirs import user_cache_path
 from spacy import Language
 
 from packg.strings import quote_with_urlparse
-from visiontext.nlp.spacytools import maybe_download_spacy_model, SPACY_DEFAULT_EN
+from visiontext.nlp.spacytools import SPACY_DEFAULT_EN, maybe_download_spacy_model
 
 
 class LemmatizerInterface:

@@ -7,7 +7,7 @@ from loguru import logger
 from packg.iotools import dump_json
 from packg.iotools.pathspec_matcher import PathSpecArgs
 from packg.log import SHORTEST_FORMAT, configure_logger, get_logger_level_from_args
-from typedparser import VerboseQuietArgs, add_argument, TypedParser
+from typedparser import TypedParser, VerboseQuietArgs, add_argument
 from visiontext.iotools.tar_lookup import TarLookup
 
 

@@ -26,9 +26,9 @@ import tarfile
 from typing import Any, Callable, Dict, Iterable, Iterator, Optional
 
 import webdataset as wds
-from webdataset import gzfilter, autodecode, pipelinefilter, reraise_exception
-from webdataset.autodecode import basichandlers, Continue
-from webdataset.tariterators import tar_file_iterator, base_plus_ext, url_opener
+from webdataset import autodecode, gzfilter, pipelinefilter, reraise_exception
+from webdataset.autodecode import Continue, basichandlers
+from webdataset.tariterators import base_plus_ext, tar_file_iterator, url_opener
 
 from packg.iotools import load_json
 

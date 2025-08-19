@@ -1,4 +1,5 @@
 import pytest
+
 from visiontext.configutils import load_dotlist
 
 

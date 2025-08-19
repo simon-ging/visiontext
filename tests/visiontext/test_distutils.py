@@ -1,11 +1,11 @@
 from visiontext.distutils import (
+    barrier_safe,
+    get_global_rank,
     get_process_info,
     get_world_info,
-    get_global_rank,
-    print_main,
-    is_main_process,
-    barrier_safe,
     is_distributed,
+    is_main_process,
+    print_main,
 )
 
 

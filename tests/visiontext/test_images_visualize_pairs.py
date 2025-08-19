@@ -1,5 +1,6 @@
-import torch
 import os
+
+import torch
 
 from visiontext.images import visualize_image_text_pairs_from_tensor
 

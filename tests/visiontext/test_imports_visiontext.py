@@ -4,7 +4,7 @@ from pprint import pprint
 import pytest
 
 from packg import format_exception
-from packg.testing import apply_visitor, ImportFromSourceChecker, recurse_modules
+from packg.testing import ImportFromSourceChecker, apply_visitor, recurse_modules
 
 module_list = list(recurse_modules("visiontext", ignore_tests=True, packages_only=False))
 pprint(module_list)

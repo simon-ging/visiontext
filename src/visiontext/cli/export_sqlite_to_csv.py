@@ -1,13 +1,13 @@
 import os
-
-import pandas as pd
 import sqlite3
-from attrs import define
-from loguru import logger
 from pathlib import Path
 
+import pandas as pd
+from attrs import define
+from loguru import logger
+
 from packg.log import SHORTEST_FORMAT, configure_logger, get_logger_level_from_args
-from typedparser import VerboseQuietArgs, add_argument, TypedParser
+from typedparser import TypedParser, VerboseQuietArgs, add_argument
 
 
 @define

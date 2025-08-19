@@ -11,7 +11,7 @@ Torch backends: https://pytorch.org/docs/stable/backends.html
 """
 
 from packg import format_exception
-from visiontext.profiling import get_gpu_profiler, GPUProfilerTorch
+from visiontext.profiling import GPUProfilerTorch, get_gpu_profiler
 
 
 def main():

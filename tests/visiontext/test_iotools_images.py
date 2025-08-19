@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from visiontext.images import JPEGDecoderConst, encode_jpeg, decode_jpeg, show_image_pil
+from visiontext.images import JPEGDecoderConst, decode_jpeg, encode_jpeg, show_image_pil
 
 
 def _image_delta(i1, i2):

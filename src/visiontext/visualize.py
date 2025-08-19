@@ -1,5 +1,6 @@
-import torch
 from typing import Optional
+
+import torch
 
 from visiontext.htmltools import NotebookHTMLPrinter
 from visiontext.mathutils import torch_stable_softmax

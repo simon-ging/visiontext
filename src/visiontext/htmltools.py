@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import base64
 import io
-from IPython.display import display, HTML
-from PIL import Image
 from io import BytesIO
-from matplotlib import pyplot as plt
 from typing import Optional
 
-from visiontext.images import scale_image_to_width, scale_image_to_height
+from IPython.display import HTML, display
+from matplotlib import pyplot as plt
+from PIL import Image
+
+from visiontext.images import scale_image_to_height, scale_image_to_width
 
 
 class NotebookHTMLPrinter:

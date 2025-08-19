@@ -1,10 +1,11 @@
-import pandas as pd
 import webbrowser
 from contextlib import contextmanager
-from loguru import logger
-from pandas.io.formats.style import Styler
 from pathlib import Path
 from typing import Optional
+
+import pandas as pd
+from loguru import logger
+from pandas.io.formats.style import Styler
 
 from visiontext.colormaps import redgreen_bright
 

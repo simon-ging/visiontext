@@ -1,13 +1,14 @@
-from PIL import Image, ImageDraw, ImageFont
+from typing import Dict, List, Optional, Tuple, Union
+
 from matplotlib import colors as mpl_colors
-from typing import Dict, List, Tuple, Optional, Union
+from PIL import Image, ImageDraw, ImageFont
 
 from packg.maths import clip_rectangle_coords
-from visiontext.font import get_dejavusans_font_path
 from visiontext.colormaps import (
-    create_colormap_for_dark_background,
     create_colorgetter_from_colormap,
+    create_colormap_for_dark_background,
 )
+from visiontext.font import get_dejavusans_font_path
 
 
 def create_bbox_images(
