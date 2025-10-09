@@ -11,6 +11,7 @@ import signal
 import time
 from contextlib import contextmanager
 from pathlib import Path
+import warnings
 
 import PIL
 import requests
@@ -33,10 +34,13 @@ except Exception as e:
 
 try:
     import pillow_avif  # pip install pillow-avif-plugin
-except Exception as e:
-    print(f"WARNING: pillow_avif not available: {format_exception(e)}")
 
-_ = pillow_avif
+    _ = pillow_avif
+except Exception as e:
+    warnings.warn(
+        f"WARNING: pillow_avif not available: {format_exception(e)} so visiontext.image_downloader"
+        f" will not be able to read or write avif images. Install:\npip install pillow-avif-plugin"
+    )
 
 
 class APIDisabledError(Exception):
