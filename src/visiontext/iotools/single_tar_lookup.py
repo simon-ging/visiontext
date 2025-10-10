@@ -81,7 +81,7 @@ def get_tar_index(
     index_file: Optional[PathType] = None,
     force: bool = False,
     check_stat: bool = True,
-) -> dict[str, any]:
+) -> dict[str, Any]:
     """
 
     Args:

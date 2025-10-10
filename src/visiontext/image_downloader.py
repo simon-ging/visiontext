@@ -11,6 +11,7 @@ import signal
 import time
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any
 import warnings
 
 import PIL
@@ -384,7 +385,7 @@ def download_image_with_retry_only_once(
     return rgb_img, alpha_img, exif_data, err
 
 
-def get_exif_from_pillow_image(img) -> tuple[dict[str, any], list[str]]:
+def get_exif_from_pillow_image(img) -> tuple[dict[str, Any], list[str]]:
     return_dict = {}
     img_exif = img.getexif()
     IFD_CODE_LOOKUP = {i.value: i.name for i in ExifTags.IFD}

@@ -131,6 +131,8 @@ def barrier_safe():
     if is_distributed():
         from torch import distributed as dist
 
+        # print_with_rank(f"Barrier at rank {get_global_rank()}")
+
         dist.barrier()
 
 
