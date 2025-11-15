@@ -1,19 +1,20 @@
-from __future__ import annotations
+from __future__ import annotations  # py 3.9 support
 
 import datetime
 import os
 from pathlib import Path
 
 import h5py
-from attr import define, field
+from attrs import define, field
 from loguru import logger
 from platformdirs import user_cache_path
-from spacy import Language
+
 
 from packg.strings import quote_with_urlparse
 from visiontext.nlp.spacytools import SPACY_DEFAULT_EN, maybe_download_spacy_model
 
 
+@define(slots=False)
 class LemmatizerInterface:
     def lemmatize(self, in_str: str) -> list[str]:
         raise NotImplementedError
@@ -27,9 +28,10 @@ class LemmatizerInterface:
 
 @define(slots=False)
 class LemmatizerSpacy(LemmatizerInterface):
-    name: str = SPACY_DEFAULT_EN
-    _lemmatizer: Language | None = field(init=False, repr=False, default=None)
-    verbose: bool = False
+    # no idea why here I have to set the fields explicitly but at least it works again
+    name: str = field(default=SPACY_DEFAULT_EN)
+    _lemmatizer = field(init=False, repr=False, default=None)  # type spacy.Language
+    verbose: bool = field(default=False)
 
     def get_unique_name(self) -> str:
         return f"spacy_{self.name}"

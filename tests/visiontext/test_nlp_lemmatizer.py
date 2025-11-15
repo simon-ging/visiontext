@@ -12,6 +12,8 @@ input_sentence = "The dogs are running up and down the hills. ßßß"
 output_words = ["The", "dog", "are", "run", "up", "and", "down", "the", "hill", ".", "ßßß"]
 
 
+sv = sys.version_info
+@pytest.mark.skipif(sv < (3, 10), reason=f"Spacy requires python >= 3.10, current version: {sv}")
 @pytest.mark.full
 def test_lemmatizer_simple():
     lemmatizer = get_lemmatizer(use_db=False)
@@ -22,6 +24,7 @@ def test_lemmatizer_simple():
     assert outputs == [output_words]
 
 
+@pytest.mark.skipif(sv < (3, 10), reason=f"Spacy requires python >= 3.10, current version: {sv}")
 @pytest.mark.full
 def test_lemmatizer_db(tmp_path_factory: pytest.TempPathFactory):
     tmp_file = tmp_path_factory.mktemp("data").joinpath("TEMPtest.h5")

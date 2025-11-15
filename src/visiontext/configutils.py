@@ -1,3 +1,5 @@
+from __future__ import annotations  # py 3.9 support
+
 from omegaconf import OmegaConf
 
 from typedparser.objects import modify_nested_object
