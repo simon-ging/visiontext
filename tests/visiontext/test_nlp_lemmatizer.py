@@ -13,6 +13,8 @@ output_words = ["The", "dog", "are", "run", "up", "and", "down", "the", "hill", 
 
 
 sv = sys.version_info
+
+
 @pytest.mark.skipif(sv < (3, 10), reason=f"Spacy requires python >= 3.10, current version: {sv}")
 @pytest.mark.full
 def test_lemmatizer_simple():
