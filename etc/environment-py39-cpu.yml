@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - conda-forge::python=3.9
+  - conda-forge::sqlite

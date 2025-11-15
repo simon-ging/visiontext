@@ -1,6 +1,9 @@
 # visiontext
 
 <p align="center">
+<a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py39-cpu.yml">
+  <img alt="minimal build 3.9 status" title="build 3.9 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py39-cpu.yml?branch=main&label=minimal%20build%203.9%20cpu" />
+</a>
 <a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py310-cpu.yml">
   <img alt="minimal build 3.10 status" title="build 3.10 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py310-cpu.yml?branch=main&label=minimal%20build%203.10%20cpu" />
 </a>
@@ -8,6 +11,9 @@
   <img alt="minimal build 3.12 status" title="build 3.12 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py312-cpu.yml?branch=main&label=minimal%20build%203.12%20cpu" />
 </a>
 <br />
+<a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py39-cpu.yml">
+  <img alt="full build 3.9 status" title="build 3.9 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py39-cpu-full.yml?branch=main&label=full%20build%203.9%20cpu" />
+</a>
 <a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py310-cpu.yml">
   <img alt="full build 3.10 status" title="build 3.10 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py310-cpu-full.yml?branch=main&label=full%20build%203.10%20cpu" />
 </a>
