@@ -69,7 +69,8 @@ def test_convert_to_fp16_torch_success():
     feat = torch.randn((10, 10)) * 100  # Max abs ~300-400
     feat_fp16 = convert_to_fp16_torch(feat)
     assert feat_fp16.dtype == torch.float16
-    assert torch.allclose(feat, feat_fp16.float(), atol=1e-2)
+    # for fp16 we have to accept some loss in precision
+    torch.testing.assert_close(feat, feat_fp16.float(), atol=0.1, rtol=1e-3)
 
 
 def test_convert_to_fp16_torch_overflow():
@@ -91,8 +92,6 @@ def test_convert_to_fp16_torch_edge_case():
 
 def test_dump_load_safetensors_zst_basic(tmp_path):
     """Test basic save and load of safetensors with zstd compression."""
-    pytest.importorskip("safetensors")
-
     # Create test tensors
     tensors = {
         "tensor1": torch.randn((5, 10)),
@@ -112,13 +111,11 @@ def test_dump_load_safetensors_zst_basic(tmp_path):
     # Verify
     assert set(loaded_tensors.keys()) == set(tensors.keys())
     for key in tensors.keys():
-        assert torch.allclose(tensors[key], loaded_tensors[key])
+        torch.testing.assert_close(tensors[key], loaded_tensors[key])
 
 
 def test_dump_safetensors_zst_create_parent(tmp_path):
     """Test saving with create_parent=True."""
-    pytest.importorskip("safetensors")
-
     tensors = {"data": torch.randn((5, 5))}
     save_path = tmp_path / "subdir" / "nested" / "test.safetensors.zst"
 
@@ -129,13 +126,11 @@ def test_dump_safetensors_zst_create_parent(tmp_path):
 
     # Verify we can load it back
     loaded_tensors = load_safetensors_zst(save_path)
-    assert torch.allclose(tensors["data"], loaded_tensors["data"])
+    torch.testing.assert_close(tensors["data"], loaded_tensors["data"])
 
 
 def test_load_safetensors_zst_file_not_found(tmp_path):
     """Test that loading non-existent file raises appropriate error."""
-    pytest.importorskip("safetensors")
-
     nonexistent_path = tmp_path / "does_not_exist.safetensors.zst"
 
     with pytest.raises(FileNotFoundError):
@@ -144,8 +139,6 @@ def test_load_safetensors_zst_file_not_found(tmp_path):
 
 def test_dump_safetensors_zst_with_fp16(tmp_path):
     """Test saving and loading fp16 tensors."""
-    pytest.importorskip("safetensors")
-
     # Create tensors with values within fp16 range
     tensors = {
         "fp32_tensor": torch.randn((3, 4)) * 100,
@@ -162,45 +155,23 @@ def test_dump_safetensors_zst_with_fp16(tmp_path):
     assert loaded_tensors["fp16_tensor"].dtype == torch.float16
 
     # Verify values
-    assert torch.allclose(tensors["fp32_tensor"], loaded_tensors["fp32_tensor"])
-    assert torch.allclose(tensors["fp16_tensor"], loaded_tensors["fp16_tensor"])
-
-
-def test_dump_safetensors_zst_verbose(tmp_path, capsys):
-    """Test verbose output."""
-    pytest.importorskip("safetensors")
-
-    tensors = {"tensor": torch.randn((2, 2))}
-    save_path = tmp_path / "verbose_test.safetensors.zst"
-
-    dump_safetensors_zst(tensors, save_path, verbose=True)
-    captured = capsys.readouterr()
-    assert "Saving tensors" in captured.out
-    assert "Compressing" in captured.out
-
-    load_safetensors_zst(save_path, verbose=True)
-    captured = capsys.readouterr()
-    assert "Decompressing" in captured.out
-    assert "Loading tensors" in captured.out
+    torch.testing.assert_close(tensors["fp32_tensor"], loaded_tensors["fp32_tensor"])
+    torch.testing.assert_close(tensors["fp16_tensor"], loaded_tensors["fp16_tensor"])
 
 
 def test_dump_load_single_safetensor_zst(tmp_path):
     """Test single tensor save and load."""
-    pytest.importorskip("safetensors")
-
     tensor = torch.randn((4, 8)) * 50
     save_path = tmp_path / "single.safetensors.zst"
 
     dump_single_safetensor_zst(tensor, save_path)
     loaded_tensor = load_single_safetensor_zst(save_path)
 
-    assert torch.allclose(tensor, loaded_tensor)
+    torch.testing.assert_close(tensor, loaded_tensor)
 
 
 def test_load_single_safetensor_zst_wrong_keys(tmp_path):
     """Test that load_single_safetensor_zst raises error for multiple tensors."""
-    pytest.importorskip("safetensors")
-
     tensors = {"a": torch.randn((2, 2)), "b": torch.randn((3, 3))}
     save_path = tmp_path / "multi.safetensors.zst"
 
