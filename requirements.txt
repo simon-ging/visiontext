@@ -16,7 +16,7 @@ psutil  # ram/cpu profiling
 h5py
 pillow
 omegaconf
-
+safetensors
 termcolor
 
 chardet
