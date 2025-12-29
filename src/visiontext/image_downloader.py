@@ -9,10 +9,10 @@ import os
 import random
 import signal
 import time
+import warnings
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
-import warnings
 
 import PIL
 import requests

@@ -1,20 +1,18 @@
 import webbrowser
 from contextlib import contextmanager
 from pathlib import Path
+from timeit import default_timer
 from typing import Optional
 
 import pandas as pd
 from loguru import logger
 from pandas.io.formats.style import Styler
 
+from packg.iotools.jsonext import load_json
 from visiontext.colormaps import redgreen_bright
 
 
-from pathlib import Path
-from timeit import default_timer
-import pandas as pd
-
-from packg.iotools.jsonext import load_json
+#################### I/O utils ####################
 
 
 def load_parquet(file, dtype_backend="pyarrow", verbose: bool = False, **kwargs):
@@ -32,6 +30,7 @@ def load_parquet(file, dtype_backend="pyarrow", verbose: bool = False, **kwargs)
 def dump_parquet(df, file, engine="pyarrow", compression="snappy", **kwargs):
     df.to_parquet(file, engine=engine, compression=compression, **kwargs)
 
+
 def load_json_to_df(file):
     """Load JSON file into a pandas DataFrame.
 
@@ -45,6 +44,8 @@ def load_json_to_df(file):
     df = pd.DataFrame.from_dict(dct, orient="index")
     return df
 
+
+#################### Output / display ####################
 
 
 def create_styler(
@@ -152,3 +153,44 @@ def print_stats(input_data, title: Optional[str] = None):
     if title is not None:
         print(title)
     print(pd.Series(input_data).describe())
+
+
+#################### String field validation ####################
+
+
+def check_pandas_str_field_is_empty(
+    value, min_len: int = 1, nan_strs: set[str] | list[str] | None = {"nan"}
+) -> bool:
+    """Check if a single pandas string field is empty.
+
+    A field is considered empty if:
+    - It is NaN/None (pd.isna() returns True)
+    - After stripping whitespace, its length is less than min_len
+    - Its lowercase stripped value is in nan_strs
+    """
+    if pd.isna(value):
+        return True
+    stripped = str(value).strip()
+    if len(stripped) < min_len:
+        return True
+    if nan_strs is None:
+        return False
+    nan_strs = set(s.lower() for s in nan_strs)
+    if stripped.lower() in nan_strs:
+        return True
+    return False
+
+
+def check_pandas_str_column_is_empty(
+    series: pd.Series, min_len: int = 1, nan_strs: set[str] | list[str] | None = {"nan"}
+) -> pd.Series:
+    """Check which values in a pandas string column are empty (vectorized)."""
+    is_na = pd.isna(series)
+    # note that when doing .str... operations on NaNs they will just stay NaN
+    stripped = series.astype(str).str.strip()
+    is_too_short = stripped.str.len() < min_len
+    if nan_strs is None:
+        return is_na | is_too_short
+    nan_strs = set(s.lower() for s in nan_strs)
+    is_in_nan_strs = stripped.str.lower().isin(nan_strs)
+    return is_na | is_too_short | is_in_nan_strs

@@ -24,8 +24,8 @@ if sys.version_info < (3, 10):
 else:
 
     import spacy
-    from spacy.cli import download as spacy_download
     from spacy import Language
+    from spacy.cli import download as spacy_download
 
     def get_or_maybe_download_spacy_model(model=SPACY_DEFAULT_EN):
         if model in loaded_spacy_models:

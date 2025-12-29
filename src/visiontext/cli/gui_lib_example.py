@@ -18,11 +18,11 @@ from packg.iotools import loads_json
 from packg.log import SHORTEST_FORMAT, configure_logger, get_logger_level_from_args
 from packg.system import systemcall
 from typedparser import TypedParser, VerboseQuietArgs, add_argument
-from visiontext.profiling import start_pyinstrument_profiler, stop_pyinstrument_profiler
-
 from visiontext.gui.gui_base import GuiBase
 from visiontext.gui.gui_config import GuiConfig
 from visiontext.gui.gui_modules import GuiModule
+from visiontext.profiling import start_pyinstrument_profiler, stop_pyinstrument_profiler
+
 from gutil.web.check_ip import find_own_ip
 
 
