@@ -1,4 +1,9 @@
 from __future__ import annotations
+from typing import List
+
+import numpy as np
+import pandas as pd
+
 import webbrowser
 from contextlib import contextmanager
 from pathlib import Path
@@ -195,3 +200,117 @@ def check_pandas_str_column_is_empty(
     nan_strs = set(s.lower() for s in nan_strs)
     is_in_nan_strs = stripped.str.lower().isin(nan_strs)
     return is_na | is_too_short | is_in_nan_strs
+
+
+#################### Compare dataframes ####################
+
+
+def compare_dataframes(
+    df1: pd.DataFrame,
+    df2: pd.DataFrame,
+    *,
+    rtol: float = 1.0e-5,
+    atol: float = 1.0e-8,
+    na_equal: bool = True,
+    coerce_numeric: bool = False,
+) -> List[str]:
+    """
+    Compare two pandas DataFrames and return a list of human-readable differences.
+    Empty list means equality under the given options.
+    
+    By default, NaN values are treated as equal (na_equal=True).
+    """
+    diffs: List[str] = []
+
+    if not isinstance(df1, pd.DataFrame) or not isinstance(df2, pd.DataFrame):
+        return [f"Type mismatch: {type(df1)} != {type(df2)}"]
+
+    # ---- index / columns checks ----
+    if not df1.index.equals(df2.index):
+        missing_in_2 = df1.index.difference(df2.index)
+        missing_in_1 = df2.index.difference(df1.index)
+        if len(missing_in_2):
+            diffs.append(f"{len(missing_in_2)} index rows missing in second df")
+        if len(missing_in_1):
+            diffs.append(f"{len(missing_in_1)} index rows missing in first df")
+
+    if not df1.columns.equals(df2.columns):
+        missing_in_2 = df1.columns.difference(df2.columns)
+        missing_in_1 = df2.columns.difference(df1.columns)
+        if len(missing_in_2):
+            diffs.append(f"{len(missing_in_2)} columns missing in second df")
+        if len(missing_in_1):
+            diffs.append(f"{len(missing_in_1)} columns missing in first df")
+
+    # ---- alignment ----
+    # Always align on union of indices/columns to continue comparison
+    union_index = df1.index.union(df2.index)
+    union_cols = df1.columns.union(df2.columns)
+    a = df1.reindex(index=union_index, columns=union_cols)
+    b = df2.reindex(index=union_index, columns=union_cols)
+
+    # ---- dtype checks ----
+    # Only check columns that exist in both original dataframes
+    cols_to_check = df1.columns.intersection(df2.columns)
+    for c in cols_to_check:
+        if a[c].dtype != b[c].dtype:
+            diffs.append(f"Column dtype mismatch '{c}': {a[c].dtype} != {b[c].dtype}")
+
+    # ---- value comparison ----
+    # Only compare columns/rows that exist in both original dataframes
+    common_cols = df1.columns.intersection(df2.columns)
+    common_idx = df1.index.intersection(df2.index)
+
+    aa = a.loc[common_idx, common_cols].copy()
+    bb = b.loc[common_idx, common_cols].copy()
+
+    if coerce_numeric:
+        for c in common_cols:
+            aa[c] = pd.to_numeric(aa[c], errors="ignore")
+            bb[c] = pd.to_numeric(bb[c], errors="ignore")
+
+    for c in common_cols:
+        s1 = aa[c]
+        s2 = bb[c]
+
+        na1 = s1.isna()
+        na2 = s2.isna()
+
+        if na_equal:
+            na_mismatch = na1 ^ na2
+            for idx in na_mismatch[na_mismatch].index:
+                diffs.append(f"[{idx!r}, {c!r}] NA mismatch: {s1.loc[idx]!r} != {s2.loc[idx]!r}")
+            mask = ~(na1 | na2)
+            s1c = s1[mask]
+            s2c = s2[mask]
+        else:
+            s1c = s1
+            s2c = s2
+
+        if s1c.empty:
+            continue
+
+        if pd.api.types.is_numeric_dtype(s1c.dtype) and pd.api.types.is_numeric_dtype(s2c.dtype):
+            close = np.isclose(
+                s1c.to_numpy(dtype=float, copy=False),
+                s2c.to_numpy(dtype=float, copy=False),
+                rtol=rtol,
+                atol=atol,
+                equal_nan=na_equal,
+            )
+            for pos in np.where(~close)[0]:
+                idx = s1c.index[pos]
+                diffs.append(f"[{idx!r}, {c!r}] {s1.loc[idx]!r} != {s2.loc[idx]!r}")
+            continue
+
+        if pd.api.types.is_datetime64_any_dtype(s1c.dtype) or pd.api.types.is_timedelta64_dtype(
+            s1c.dtype
+        ):
+            neq = s1c.ne(s2c)
+        else:
+            neq = s1c.ne(s2c)
+
+        for idx in neq[neq].index:
+            diffs.append(f"[{idx!r}, {c!r}] {s1.loc[idx]!r} != {s2.loc[idx]!r}")
+
+    return diffs

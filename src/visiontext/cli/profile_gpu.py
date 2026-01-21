@@ -10,11 +10,13 @@ Torch backends: https://pytorch.org/docs/stable/backends.html
 
 """
 
+import sys
 from packg import format_exception
-from visiontext.profiling import GPUProfilerTorch, get_gpu_profiler
+from visiontext.profiling import get_gpu_profiler
 
 
 def main():
+    print(f"Running visiontext.cli.profile_gpu at {__file__} using {sys.executable}")
     print(f"\nCheck PyTorch GPU availability")
     try:
         import torch  # noqa

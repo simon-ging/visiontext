@@ -3,7 +3,7 @@ from pathlib import Path
 import torch
 
 import visiontext.testdata
-from visiontext.torchutils import group_params_and_shapes_for_display, show_param_groups_dict
+from visiontext.torchutils import group_params_and_data_for_display, show_param_groups_dict
 
 example_data = [
     ((2048,), "transformer.resblocks.10.mlp.c_fc.bias"),
@@ -102,7 +102,7 @@ out_shapes = [
 
 def test_format_named_params():
     shapes, names = zip(*example_data)
-    ret_names, ret_shapes = group_params_and_shapes_for_display(names, shapes)
+    ret_names, ret_shapes = group_params_and_data_for_display(names, shapes)
     assert ret_names == out_names
     assert ret_shapes == out_shapes
 

@@ -1,11 +1,13 @@
 from __future__ import annotations
-
+from packg.strings import dict_to_str_comma_equals
 import re
 from collections import defaultdict
 
 import numpy as np
 import torch
 from natsort import natsorted
+
+from typedparser.objects import compare_nested_objects
 
 
 def get_statedict_mean_std(statedict):
@@ -99,7 +101,7 @@ def count_params(parameters) -> int:
     return total
 
 
-def group_params_and_shapes_for_display(param_names, param_shapes):
+def group_params_and_data_for_display(param_names, param_data):
     """
     Compress parameter names by grouping those that differ only in their first numeric part.
 
@@ -114,8 +116,9 @@ def group_params_and_shapes_for_display(param_names, param_shapes):
     ungrouped = []
 
     # For each parameter, find the first number in its name
-    for name, shape in zip(param_names, param_shapes):
+    for name, data in zip(param_names, param_data):
         m = re.search(r"(\d+)", name)
+        data_clean = {k: v for k, v in data.items() if k not in {"param", "name", "param_name"}}
         if m:
             # Split param into prefix, the found number, and suffix
             start, end = m.span(1)
@@ -124,22 +127,32 @@ def group_params_and_shapes_for_display(param_names, param_shapes):
             suffix = name[end:]
             block_number = int(number_str)
             # Use the shape, prefix, and suffix as the grouping key
-            key = (shape, prefix, suffix)
-            groups[key].append(block_number)
+            data_key = dict_to_str_comma_equals(data_clean)
+            key = (data_key, prefix, suffix)
+            groups[key].append((block_number, data_clean))
         else:
             # If no number is found, leave this parameter ungrouped
-            ungrouped.append((name, shape))
+            ungrouped.append((name, data))
 
     output = []
     # Process groups that have a numeric part
-    for (shape, prefix, suffix), nums in groups.items():
-        nums.sort()
+    for (data_key, prefix, suffix), nums_and_data in groups.items():
+        nums, data_list = [], []
+        data = None
+        for num, new_data in sorted(nums_and_data, key=lambda x: x[0]):
+            nums.append(num)
+            if data is None:
+                data = new_data
+            else:
+                diffs = compare_nested_objects(data, new_data)
+                if len(diffs) > 0:
+                    raise ValueError(f"Data mismatch: {data} != {new_data}\nDiff: {diffs}")
         if len(nums) > 1:
             # Compress multiple block numbers into a range (min-max)
             compressed_number = f"[{nums[0]}-{nums[-1]}]"
         else:
             compressed_number = str(nums[0])
-        output.append((f"{prefix}{compressed_number}{suffix}", shape))
+        output.append((f"{prefix}{compressed_number}{suffix}", data))
 
     # Append any entries that didn't contain a number
     output.extend(ungrouped)
@@ -177,7 +190,7 @@ def show_param_groups_dict(param_groups_dict, print_fn=print):
             param_shapes.append(param_shape)
             n_params = np.prod(param_shape)
             group_n_params += n_params
-        new_names, new_shapes = group_params_and_shapes_for_display(param_names, param_shapes)
+        new_names, new_shapes = group_params_and_data_for_display(param_names, param_shapes)
         for param_name, param_shape in zip(new_names, new_shapes):
             print_fn(f"    {str(param_shape):20s} {param_name}")
         print_fn(f"    Total parameters in group: {int(group_n_params):_d}")
