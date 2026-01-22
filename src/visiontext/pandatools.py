@@ -266,8 +266,8 @@ def compare_dataframes(
 
     if coerce_numeric:
         for c in common_cols:
-            aa[c] = pd.to_numeric(aa[c], errors="ignore")
-            bb[c] = pd.to_numeric(bb[c], errors="ignore")
+            aa[c] = pd.to_numeric(aa[c], errors="coerce")
+            bb[c] = pd.to_numeric(bb[c], errors="coerce")
 
     for c in common_cols:
         s1 = aa[c]
