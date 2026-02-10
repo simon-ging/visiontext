@@ -31,6 +31,7 @@ def stop_pyinstrument_profiler(
     color=True,
     output_dir: PathType = Path.home(),  # browser maybe can't access /tmp, so use home as default
 ) -> str:
+    global current_profiler
     if current_profiler is None:
         logger.error("No profiler running!")
         return ""
@@ -55,6 +56,8 @@ def stop_pyinstrument_profiler(
     output_file_html = output_dir / f"{output_name}.html"
     Path(output_file_html).write_text(html_render_str, encoding="utf-8")
     print(f"Saved profiler text output to {output_file_text} and HTML output to {output_file_html}")
+
+    current_profiler = None
     if open_in_browser:
         try:
             url = urllib.parse.urlunparse(("file", "", output_file_html, "", "", ""))
