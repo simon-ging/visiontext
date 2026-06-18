@@ -49,3 +49,10 @@ class ColorFormatter:
         if self.theme == "dark":
             return termcolor.colored(inp, "light_grey")
         return termcolor.colored(inp, "grey")
+
+    def fmt_color(self, inp, color):
+        if self.theme == "none":
+            return inp
+        if self.theme == "dark":
+            return termcolor.colored(inp, f"light_{color}")
+        return termcolor.colored(inp, color)

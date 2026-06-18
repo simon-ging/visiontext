@@ -327,10 +327,8 @@ def get_cursor(indexfn):
     result = cur.fetchone()
     if not result:
         # create file data table
-        cur.execute(
-            """CREATE TABLE file_data (file_id INTEGER PRIMARY KEY,
-                    file_name TEXT, mtime FLOAT)"""
-        )
+        cur.execute("""CREATE TABLE file_data (file_id INTEGER PRIMARY KEY,
+                    file_name TEXT, mtime FLOAT)""")
         cur.execute("CREATE INDEX file_data_file_name ON file_data (file_name)")
         # create offset_data table
         cur.execute(

@@ -1,22 +1,18 @@
 from __future__ import annotations
-from typing import List
-
-import numpy as np
-import pandas as pd
 
 import webbrowser
 from contextlib import contextmanager
 from pathlib import Path
 from timeit import default_timer
-from typing import Optional
+from typing import List, Optional
 
+import numpy as np
 import pandas as pd
 from loguru import logger
 from pandas.io.formats.style import Styler
 
 from packg.iotools.jsonext import load_json
 from visiontext.colormaps import redgreen_bright
-
 
 #################### I/O utils ####################
 
@@ -217,7 +213,7 @@ def compare_dataframes(
     """
     Compare two pandas DataFrames and return a list of human-readable differences.
     Empty list means equality under the given options.
-    
+
     By default, NaN values are treated as equal (na_equal=True).
     """
     diffs: List[str] = []

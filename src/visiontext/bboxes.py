@@ -48,7 +48,7 @@ def create_bbox_images(
     y1 = by - rel_bbox_width
     x2 = bx + bw + rel_bbox_width
     y2 = by + bh + rel_bbox_width
-    (x1, y1, x2, y2) = clip_rectangle_coords((x1, y1, x2, y2), w, h)
+    x1, y1, x2, y2 = clip_rectangle_coords((x1, y1, x2, y2), w, h)
 
     for bbox_step in range(rel_bbox_width):
         rectangle_coords = (

@@ -1,5 +1,6 @@
 from __future__ import annotations
-from packg.strings import dict_to_str_comma_equals
+
+from collections.abc import Mapping
 import re
 from collections import defaultdict
 
@@ -7,6 +8,7 @@ import numpy as np
 import torch
 from natsort import natsorted
 
+from packg.strings import dict_to_str_comma_equals
 from typedparser.objects import compare_nested_objects
 
 
@@ -101,16 +103,19 @@ def count_params(parameters) -> int:
     return total
 
 
-def group_params_and_data_for_display(param_names, param_data):
+def group_params_and_data_for_display(param_names: list[str], param_data: list[torch.Tensor | dict | tuple[int]]) -> tuple[list[str], list[torch.Tensor | dict] | tuple[int]]:
     """
     Compress parameter names by grouping those that differ only in their first numeric part.
 
     Args:
         param_names: List of parameter names
-        param_shapes: List of parameter shapes
+        param_data: List of parameter data. It can be:
+            - The actual parameter tensors (torch.Tensor)
+            - The shapes of the parameters (tuple[int])
+            - Dicts containing parameter groups
 
     Returns:
-        Tuple of lists (new_compressed_param_names, param_shapes)
+        Tuple of lists (new_compressed_param_names, param_data)
     """
     groups = defaultdict(list)
     ungrouped = []
@@ -118,7 +123,17 @@ def group_params_and_data_for_display(param_names, param_data):
     # For each parameter, find the first number in its name
     for name, data in zip(param_names, param_data):
         m = re.search(r"(\d+)", name)
-        data_clean = {k: v for k, v in data.items() if k not in {"param", "name", "param_name"}}
+        if isinstance(data, Mapping):
+            # strip the parameter itself (it cannot be grouped) and the name, since the name is
+            # given in param_names
+            data_clean = {k: v for k, v in data.items() if k not in {"param", "name", "param_name"}}
+        elif hasattr(data, "shape"):
+            # turn parameter into shape for display
+            data_clean = tuple(getattr(data, "shape"))
+        else:
+            data_clean = tuple(data)
+            for di, d in enumerate(data_clean):
+                assert isinstance(d, int), f"Input is not tensor, param group, or shape: {data}"
         if m:
             # Split param into prefix, the found number, and suffix
             start, end = m.span(1)
@@ -127,12 +142,15 @@ def group_params_and_data_for_display(param_names, param_data):
             suffix = name[end:]
             block_number = int(number_str)
             # Use the shape, prefix, and suffix as the grouping key
-            data_key = dict_to_str_comma_equals(data_clean)
+            if isinstance(data_clean, Mapping):
+                data_key = dict_to_str_comma_equals(data_clean)
+            else:
+                data_key = ",".join(map(str, data_clean))
             key = (data_key, prefix, suffix)
             groups[key].append((block_number, data_clean))
         else:
             # If no number is found, leave this parameter ungrouped
-            ungrouped.append((name, data))
+            ungrouped.append((name, data_clean))
 
     output = []
     # Process groups that have a numeric part
@@ -158,6 +176,13 @@ def group_params_and_data_for_display(param_names, param_data):
     output.extend(ungrouped)
     return (list(a) for a in zip(*output))
 
+def group_params_and_shapes_for_display(param_names, param_shapes):
+    """
+    Deprecated version of the below function, but for now the data grouping function just groups
+    the input, so it still works when being fed shapes instead of the actual parameters.
+    So we keep this function for backwards compatibility for now.
+    """
+    return group_params_and_data_for_display(param_names, param_shapes)
 
 def show_param_groups_dict(param_groups_dict, print_fn=print):
     """

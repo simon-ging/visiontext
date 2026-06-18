@@ -1,10 +1,7 @@
 import pandas as pd
 import pytest
 
-from visiontext.pandatools import (
-    check_pandas_str_column_is_empty,
-    check_pandas_str_field_is_empty,
-)
+from visiontext.pandatools import check_pandas_str_column_is_empty, check_pandas_str_field_is_empty
 
 
 def test_check_pandas_str_field_is_empty():
