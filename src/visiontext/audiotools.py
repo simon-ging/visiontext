@@ -57,6 +57,8 @@ def load_audio_file(
 def check_audio_quality(frequency, data, eps=1e-6) -> bool:
     """
     logic: a good quality music file will have audio at 20khz. a bad one will not.
+
+    TODO this is not very reliable
     """
     # dmin, dmax = data.min(), data.max()
     # dnorm = (data - dmin) / (dmax - dmin)
