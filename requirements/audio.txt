@@ -1,2 +1,0 @@
-pydub  # audio processing
-scipy

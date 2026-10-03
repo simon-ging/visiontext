@@ -7,7 +7,7 @@ name = "visiontext"
 description = "Utilities for deep learning on multimodal data."
 readme = "README.md"
 authors = [{ "name" = "simon-ging" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 keywords = ["python", "jupyter", "notebook", "lab", "ipython", "html", "pandas", "matplotlib",
@@ -16,7 +16,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Natural Language :: English",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -39,30 +38,14 @@ dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools.dynamic.optional-dependencies]
 torch = { file = ["requirements/torch.txt"] }
-images = { file = ["requirements/torch.txt", "requirements/images.txt"] }
-plot = { file = ["requirements/plot.txt"] }
-notebook = { file = ["requirements/plot.txt", "requirements/notebook.txt"] }
-webdataset = { file = ["requirements/torch.txt", "requirements/webdataset.txt"] }
+notebook = { file = ["requirements/notebook.txt"] }
 nlp = { file = ["requirements/nlp.txt"] }
-profiling = { file = ["requirements/torch.txt", "requirements/profiling.txt"] }
-download = { file = ["requirements/download.txt"] }
-audio = { file = ["requirements/audio.txt"] }
-cache = { file = ["requirements/cache.txt"] }
-sql = { file = ["requirements/sql.txt"] }
-config = { file = ["requirements/config.txt"] }
+db = { file = ["requirements/db.txt"] }
 full = { file = [
     "requirements/torch.txt",
-    "requirements/images.txt",
-    "requirements/plot.txt",
     "requirements/notebook.txt",
-    "requirements/webdataset.txt",
     "requirements/nlp.txt",
-    "requirements/profiling.txt",
-    "requirements/download.txt",
-    "requirements/audio.txt",
-    "requirements/cache.txt",
-    "requirements/sql.txt",
-    "requirements/config.txt",
+    "requirements/db.txt",
 ] }
 
 [tool.black]

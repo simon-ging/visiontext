@@ -1,9 +1,6 @@
 # visiontext
 
 <p align="center">
-<a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py39-cpu.yml">
-  <img alt="minimal build 3.9 status" title="build 3.9 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py39-cpu.yml?branch=main&label=minimal%20build%203.9%20cpu" />
-</a>
 <a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py310-cpu.yml">
   <img alt="minimal build 3.10 status" title="build 3.10 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py310-cpu.yml?branch=main&label=minimal%20build%203.10%20cpu" />
 </a>
@@ -11,9 +8,6 @@
   <img alt="minimal build 3.12 status" title="build 3.12 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py312-cpu.yml?branch=main&label=minimal%20build%203.12%20cpu" />
 </a>
 <br />
-<a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py39-cpu.yml">
-  <img alt="full build 3.9 status" title="build 3.9 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py39-cpu-full.yml?branch=main&label=full%20build%203.9%20cpu" />
-</a>
 <a href="https://github.com/simon-ging/visiontext/actions/workflows/build-py310-cpu.yml">
   <img alt="full build 3.10 status" title="build 3.10 status" src="https://img.shields.io/github/actions/workflow/status/simon-ging/visiontext/build-py310-cpu-full.yml?branch=main&label=full%20build%203.10%20cpu" />
 </a>
@@ -43,22 +37,14 @@ Requires `python>=3.10`.
 pip install visiontext
 ```
 
-The base install is small. Each area of the package has an extra with what it needs:
+The base install has no heavy packages. Those come with extras:
 
-| extra | for |
-| --- | --- |
-| `torch` | `distutils`, `mathutils`, `torchutils`, `denormalize`, `iotools.feature_compression` |
-| `images` | `images`, includes `torch`. Additionally requires `libjpeg-turbo` |
-| `plot` | `colormaps`, `bboxes`, `plots`, `visualize_ratios` |
-| `notebook` | `imports`, `htmltools`, `pandatools`, includes `plot` |
-| `webdataset` | `webdataset_pipeline`, includes `torch` |
-| `nlp` | `nlp` |
-| `profiling` | `profiling`, includes `torch` |
-| `download` | `image_downloader`, `font` |
-| `audio` | `audiotools` |
-| `cache` | `cacheutils` |
-| `sql` | `sqlalchemist`. Additionally requires `sqlite` |
-| `config` | `configutils` |
+| extra | installs | for |
+| --- | --- | --- |
+| `torch` | torch, torchvision, safetensors, webdataset, opencv, turbojpeg | `images`, `distutils`, `mathutils`, `torchutils`, `denormalize`, `iotools.feature_compression`, `webdataset_pipeline`, `profiling.hardware_profiler`. Additionally requires `libjpeg-turbo` |
+| `notebook` | matplotlib, seaborn, pandas, scipy, ipython, jupyter | `imports`, `htmltools`, `pandatools`, `colormaps`, `bboxes`, `plots`, `audiotools` |
+| `nlp` | nltk, spacy, h5py | `nlp` |
+| `db` | sqlalchemy, lmdb | `sqlalchemist`, `cacheutils`. Additionally requires `sqlite` |
 
 ```bash
 pip install visiontext[torch,notebook]

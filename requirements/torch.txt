@@ -1,3 +1,8 @@
+# torch itself and what only makes sense with it
 torch
 torchvision
 safetensors
+webdataset
+# jpeg coding in visiontext.images
+opencv-python
+pyturbojpeg

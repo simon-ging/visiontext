@@ -18,6 +18,19 @@ Todo: Write tests, does it work with all kinds of images (grayscale, RGB, RGBA)
 
 Todo: this CMYK file breaks libjpeg-turbo: datasets/imagenet1k/val/n13133613/ILSVRC2012_val_00019877.JPEG
 
+TODO:
+- EXIF orientation is never applied, rotated photos come out sideways.
+- Nothing is handed to Image.save(), so exif, icc_profile, xmp, dpi and PNG text chunks are
+  dropped. Pillow reads them from encoderinfo (the save kwargs) only, never from im.info.
+- Saving an image that has transparency as jpg is not detected, the alpha channel is lost.
+- open_image_scaled(convert="RGB") flattens alpha and expands grayscale to three channels.
+- Scaling a pillow image pulls in numpy, torch, torchvision, opencv and turbojpeg.
+- PILImageScaler picks its return type with two booleans (return_pillow, return_fp32) and the
+  module-level aliases bind one global configuration.
+- scale_image_smaller_side rounds the target size, the other scale functions truncate it.
+- Image.open() is never closed.
+- get_image_properties asserts mode in L/RGB/RGBA and crashes on P, LA, CMYK, I;16.
+
 Examples:
     >>> from IPython.display import display
     >>> image = open_image_scaled("image.png", bigger_side=500)
@@ -269,7 +282,8 @@ def encode_jpeg(
         import cv2
         import turbojpeg
 
-        np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
+        # a gray image has no channels to swap, and turbojpeg wants it as (h, w)
+        np_arr_bgr = np_arr if is_gray else cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
         encoded_arr = _jpeg_getter.get().encode(
             np_arr_bgr, quality=quality, **_get_tjpeg_kwargs(is_gray)
         )
@@ -278,11 +292,13 @@ def encode_jpeg(
         import cv2
         import turbojpeg
 
-        np_arr_bgr = cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
+        # a gray image has no channels to swap, and turbojpeg wants it as (h, w)
+        np_arr_bgr = np_arr if is_gray else cv2.cvtColor(np_arr, cv2.COLOR_RGB2BGR)
         encoded_arr = _jpeg_getter.get().encode(
             np_arr_bgr,
             quality=quality,
-            flags=turbojpeg.TJFLAG_FASTUPSAMPLE | turbojpeg.TJFLAG_FASTDCT,
+            # upsampling only happens when decoding, turbojpeg rejects that flag here
+            flags=turbojpeg.TJFLAG_FASTDCT,
             **_get_tjpeg_kwargs(is_gray),
         )
         return encoded_arr

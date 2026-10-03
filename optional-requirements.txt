@@ -1,13 +1,5 @@
 # everything the full extra installs, one file per extra
 -r requirements/torch.txt
--r requirements/images.txt
--r requirements/plot.txt
 -r requirements/notebook.txt
--r requirements/webdataset.txt
 -r requirements/nlp.txt
--r requirements/profiling.txt
--r requirements/download.txt
--r requirements/audio.txt
--r requirements/cache.txt
--r requirements/sql.txt
--r requirements/config.txt
+-r requirements/db.txt

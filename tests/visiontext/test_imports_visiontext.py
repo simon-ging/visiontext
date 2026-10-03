@@ -10,6 +10,7 @@ module_list = list(recurse_modules("visiontext", ignore_tests=True, packages_onl
 pprint(module_list)
 
 
+@pytest.mark.full
 @pytest.mark.parametrize("module", module_list)
 def test_imports_from_source(module: str) -> None:
     print(f"Importing: {module}")

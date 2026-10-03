@@ -1,4 +1,0 @@
-# visiontext.image_downloader and font
-cairosvg
-pillow-avif-plugin
-platformdirs

@@ -1,9 +1,14 @@
 import re
 
 import numpy as np
-from matplotlib import pyplot as plt
+import pytest
 
-from visiontext.htmltools import convert_figure_to_html_tag
+pytest.importorskip("matplotlib")  # part of the notebook extra
+pytest.importorskip("IPython")
+
+from matplotlib import pyplot as plt  # noqa: E402
+
+from visiontext.htmltools import convert_figure_to_html_tag  # noqa: E402
 
 
 def test_figure_to_html_tag():

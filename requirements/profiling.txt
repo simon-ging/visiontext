@@ -1,3 +1,0 @@
-pyinstrument
-nvidia-ml-py  # gpu profiling
-psutil  # ram/cpu profiling

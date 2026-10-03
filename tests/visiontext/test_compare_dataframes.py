@@ -1,8 +1,9 @@
 import numpy as np
-import pandas as pd
 import pytest
 
-from visiontext.pandatools import compare_dataframes
+pd = pytest.importorskip("pandas")  # part of the notebook extra
+
+from visiontext.pandatools import compare_dataframes  # noqa: E402
 
 
 @pytest.fixture

@@ -2,3 +2,12 @@ packg
 numpy
 pillow
 termcolor
+omegaconf
+platformdirs
+msgpack
+psutil  # ram/cpu profiling
+nvidia-ml-py  # gpu profiling
+pyinstrument
+pydub  # audio processing
+pillow-avif-plugin
+cairosvg

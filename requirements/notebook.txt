@@ -1,7 +1,10 @@
-# visiontext.imports, htmltools, pandatools, on top of the plot extra
+# the scientific and notebook stack
+matplotlib
+seaborn
+pandas
+scipy
 ipython
 jupyter
 notebook
 itables
 ipdb
-pandas

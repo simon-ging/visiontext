@@ -1,3 +1,0 @@
-# visiontext.images, on top of the torch extra
-opencv-python
-pyturbojpeg

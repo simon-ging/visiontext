@@ -1,3 +1,5 @@
+from __future__ import annotations  # py 3.9 support
+
 import os
 from pathlib import Path
 

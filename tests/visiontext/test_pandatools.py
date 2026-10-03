@@ -1,7 +1,11 @@
-import pandas as pd
 import pytest
 
-from visiontext.pandatools import check_pandas_str_column_is_empty, check_pandas_str_field_is_empty
+pd = pytest.importorskip("pandas")  # part of the notebook extra
+
+from visiontext.pandatools import (  # noqa: E402
+    check_pandas_str_column_is_empty,
+    check_pandas_str_field_is_empty,
+)
 
 
 def test_check_pandas_str_field_is_empty():

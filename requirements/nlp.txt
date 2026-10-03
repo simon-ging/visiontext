@@ -1,4 +1,3 @@
 nltk
-spacy ; python_version >= "3.10"  # doesn't work below 3.10
+spacy
 h5py
-platformdirs
