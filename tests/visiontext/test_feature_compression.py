@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-import torch
 
-from visiontext.iotools.feature_compression import (
+# both are part of the torch extra
+torch = pytest.importorskip("torch")
+pytest.importorskip("safetensors")
+
+from visiontext.iotools.feature_compression import (  # noqa: E402
     NormsC,
     compress_fp32_to_uint8_numpy,
     compress_fp32_to_uint8_torch,

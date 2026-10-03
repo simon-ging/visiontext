@@ -6,7 +6,9 @@ import sys
 
 import pytest
 
-from visiontext.nlp.lemmatizer import get_lemmatizer
+pytest.importorskip("h5py")  # part of the nlp extra
+
+from visiontext.nlp.lemmatizer import get_lemmatizer  # noqa: E402
 
 input_sentence = "The dogs are running up and down the hills. ßßß"
 output_words = ["The", "dog", "are", "run", "up", "and", "down", "the", "hill", ".", "ßßß"]

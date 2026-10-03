@@ -1,6 +1,9 @@
 """
 Image utilities using opencv-python, libturbojpeg, pillow
 
+Deprecated: this module is kept for existing code and gets no new features. Loading, scaling
+and saving images without breaking their metadata lives in the cullet package (cullet.images).
+
 which sampling method to use:
     - bilinear is a classic
     - area might be best for downsampling
