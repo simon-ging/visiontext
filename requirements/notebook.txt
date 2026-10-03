@@ -1,0 +1,7 @@
+# visiontext.imports, htmltools, pandatools, on top of the plot extra
+ipython
+jupyter
+notebook
+itables
+ipdb
+pandas

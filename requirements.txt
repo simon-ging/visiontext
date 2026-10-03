@@ -1,31 +1,4 @@
-ipython
 packg
 numpy
-scipy
-matplotlib
-seaborn
-jupyter
-notebook
-itables
-ipdb
-nltk
-pandas
-pyinstrument
-nvidia-ml-py  # gpu profiling
-psutil  # ram/cpu profiling
-h5py
 pillow
-omegaconf
-safetensors
 termcolor
-
-chardet
-spacy ; python_version >= "3.10"  # doesn't work below 3.10
-lmdb
-msgpack
-
-pydub  # audio processing
-
-# # html / xml
-# beautifulsoup4
-# lxml

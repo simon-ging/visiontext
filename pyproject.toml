@@ -38,7 +38,32 @@ version = { attr = "visiontext.__version__" }
 dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools.dynamic.optional-dependencies]
-full = { file = ["optional-requirements.txt"] }
+torch = { file = ["requirements/torch.txt"] }
+images = { file = ["requirements/torch.txt", "requirements/images.txt"] }
+plot = { file = ["requirements/plot.txt"] }
+notebook = { file = ["requirements/plot.txt", "requirements/notebook.txt"] }
+webdataset = { file = ["requirements/torch.txt", "requirements/webdataset.txt"] }
+nlp = { file = ["requirements/nlp.txt"] }
+profiling = { file = ["requirements/torch.txt", "requirements/profiling.txt"] }
+download = { file = ["requirements/download.txt"] }
+audio = { file = ["requirements/audio.txt"] }
+cache = { file = ["requirements/cache.txt"] }
+sql = { file = ["requirements/sql.txt"] }
+config = { file = ["requirements/config.txt"] }
+full = { file = [
+    "requirements/torch.txt",
+    "requirements/images.txt",
+    "requirements/plot.txt",
+    "requirements/notebook.txt",
+    "requirements/webdataset.txt",
+    "requirements/nlp.txt",
+    "requirements/profiling.txt",
+    "requirements/download.txt",
+    "requirements/audio.txt",
+    "requirements/cache.txt",
+    "requirements/sql.txt",
+    "requirements/config.txt",
+] }
 
 [tool.black]
 line-length = 100

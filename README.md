@@ -37,16 +37,36 @@ Utilities for deep learning on multimodal data.
 
 ## Install
 
-Requires `python>=3.10`, requires `pytorch` to be installed already,
-see [https://pytorch.org/](https://pytorch.org/)
+Requires `python>=3.10`.
 
 ```bash
 pip install visiontext
 ```
 
+The base install is small. Each area of the package has an extra with what it needs:
+
+| extra | for |
+| --- | --- |
+| `torch` | `distutils`, `mathutils`, `torchutils`, `denormalize`, `iotools.feature_compression` |
+| `images` | `images`, includes `torch`. Additionally requires `libjpeg-turbo` |
+| `plot` | `colormaps`, `bboxes`, `plots`, `visualize_ratios` |
+| `notebook` | `imports`, `htmltools`, `pandatools`, includes `plot` |
+| `webdataset` | `webdataset_pipeline`, includes `torch` |
+| `nlp` | `nlp` |
+| `profiling` | `profiling`, includes `torch` |
+| `download` | `image_downloader`, `font` |
+| `audio` | `audiotools` |
+| `cache` | `cacheutils` |
+| `sql` | `sqlalchemist`. Additionally requires `sqlite` |
+| `config` | `configutils` |
+
+```bash
+pip install visiontext[torch,notebook]
+```
+
 ### Full build
 
-Additionally requires `libjpeg-turbo` and `sqlite`
+Everything at once:
 
 ```bash
 pip install visiontext[full]
