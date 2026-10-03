@@ -6,3 +6,6 @@ webdataset
 # jpeg coding in visiontext.images
 opencv-python
 pyturbojpeg
+# frame extraction in visiontext.videos
+ffmpeg-python
+memory-tempfile
