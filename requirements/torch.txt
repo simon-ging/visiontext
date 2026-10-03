@@ -9,3 +9,4 @@ pyturbojpeg
 # frame extraction in visiontext.videos
 ffmpeg-python
 memory-tempfile
+moviepy  # writing a video from frames in visiontext.videos

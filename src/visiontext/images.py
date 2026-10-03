@@ -613,3 +613,140 @@ def visualize_image_text_pairs_from_tensor(image_tensor, texts, font_size=12) ->
 
         pil_images.append(combined_image)
     return pil_images
+
+
+# ---------- opencv on float32 images in range [0, 1]
+
+
+class CV2ImageScaler:
+    upsampling_method: str = DEFAULT_UPSAMPLING_METHOD
+    downsampling_method: str = DEFAULT_DOWNSAMPLING_METHOD
+    return_fp32: bool = False
+
+    def scale_image(
+        self, img: np.ndarray, target_h: int, target_w: int, method: str = SamplingConst.AUTO
+    ):
+        h, w, _ = img.shape
+        method = self._get_method(h, w, target_h, target_w, method)
+        import cv2
+
+        cv2_method = get_interpolation_for_cv2(method)
+        img = cv2.resize(img, (target_w, target_h), interpolation=cv2_method)
+        # clip array back to 0-1
+        img = np.clip(img, 0.0, 1.0)
+        return img
+
+    def _get_method(self, h, w, target_h, target_w, method):
+        if method != SamplingConst.AUTO:
+            return method
+        return (
+            self.downsampling_method
+            if _is_downsampling(h, w, target_h, target_w)
+            else self.upsampling_method
+        )
+
+    def _prepare_return(self, img):
+        if self.return_fp32:
+            img = img.astype(np.float32) / 255.0
+            img = np.clip(img, 0.0, 1.0)
+        return img
+
+
+def read_image_stream_cv2(stream):
+    """
+    Read an image data stream as float32 range [0, 1]
+    """
+    import cv2
+
+    bytes_ = bytearray(stream.read())
+    array = np.asarray(bytes_, dtype=np.uint8)
+
+    # load image as is
+    bgr_image = cv2.imdecode(array, -1)  # cv2.IMREAD_COLOR)
+    if bgr_image is None:
+        return None
+
+    if len(bgr_image.shape) == 2:
+        # gray image: extend dimension and repeat to RGB
+        image = np.expand_dims(bgr_image, -1).astype(np.float32) / 255
+        image = np.repeat(image, 3, axis=-1)
+    elif bgr_image.shape[2] == 3:
+        # bgr image: swap channels
+        image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
+        image = image[:, :, :].astype(np.float32) / 255
+
+    elif bgr_image.shape[2] == 4:
+        # # bgra image: swap first 3 channels
+        rgba_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGRA2RGBA)
+
+        # bgra: make black underlying image
+        mask = rgba_image[:, :, 3:].astype(np.float32) / 255
+        image = rgba_image[:, :, 0:3].astype(np.float32) / 255
+        image *= mask
+    else:
+        raise ValueError("Unknown image shape: " + str(bgr_image.shape))
+
+    return image
+
+
+def read_image_cv2(full_file) -> np.ndarray:
+    """
+    Read image file, see read_image_stream
+    """
+    with open(str(full_file), "rb") as stream:
+        image = read_image_stream_cv2(stream)
+    if image is None:
+        raise FileNotFoundError(
+            f"Reading image stream returned None, probably no file at: {full_file}"
+        )
+    return image
+
+
+def write_image_cv2(full_file, image, quality=95, is_uint8=False):
+    """
+    Write image (float32 range [0, 1]) to file
+    """
+    import cv2
+
+    full_file = str(full_file)  # support Path
+
+    # assert image is RGB (no grayscale/RGBA support needed)
+    assert len(image.shape) == 3 and image.shape[2] == 3
+
+    # get extension
+    ext = full_file.rsplit(".", maxsplit=1)[-1].lower()
+
+    # only support JPEG for now (since that is how gulp stores it)
+    if ext in ["jpg", "jpeg"]:
+        params = (cv2.IMWRITE_JPEG_QUALITY, quality)
+    elif ext == "png":
+        params = (cv2.IMWRITE_PNG_COMPRESSION, 9)
+    else:
+        raise ValueError(f"{ext} images not supported")
+
+    # convert to uint8
+    if not is_uint8:
+        image *= 255
+
+    # swap colors rgb to bgr
+    bgr_image = cv2.cvtColor(image.astype(np.uint8), cv2.COLOR_RGB2BGR)
+
+    # encode and write the bytestream
+    with open(full_file, "wb") as stream:
+        _bool, arr = cv2.imencode(f".{ext}", bgr_image, params=params)
+        byt = bytearray(arr)
+        stream.write(byt)
+
+
+def show_image_cv2(image, waitkey=True):
+    import cv2
+
+    # convert image to uint8
+    image_uint8 = (image * 255).astype(np.uint8)
+    # convert rgb to bgr
+    bgr_image = cv2.cvtColor(image_uint8, cv2.COLOR_RGB2BGR)
+    # show image
+    cv2.imshow("image", bgr_image)
+    if waitkey:
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
