@@ -81,7 +81,7 @@ class LemmatizerDbWrapper(LemmatizerInterface):
 
     def __attrs_post_init__(self):
         self.cache_dir = (
-            user_cache_path("python_visiontext") if self.cache_dir is None else self.cache_dir
+            user_cache_path("visiontext") if self.cache_dir is None else self.cache_dir
         )
         self.h5_file = (
             self.cache_dir / f"lemmas/{self.lemmatizer.get_unique_name()}"

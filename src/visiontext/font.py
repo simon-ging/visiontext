@@ -37,7 +37,7 @@ def get_dejavusans_font_path() -> str:
 
     response.raise_for_status()  # Check if the download was successful
 
-    font_dir = user_cache_path("python_visiontext") / "fonts"
+    font_dir = user_cache_path("visiontext") / "fonts"
     font_dir_temp = font_dir / "dejavusans"
     font_archive = font_dir_temp / "archive.zip"
 
@@ -63,7 +63,7 @@ def get_dejavusans_font(font_size: int):
 
 def get_notosans_font_path() -> str:
     font_url = "https://github.com/googlefonts/noto-fonts/blob/main/hinted/ttf/NotoSans/NotoSans-Regular.ttf?raw=true"
-    font_path = user_cache_path("python_visiontext") / "fonts" / "NotoSans-Regular.ttf"
+    font_path = user_cache_path("visiontext") / "fonts" / "NotoSans-Regular.ttf"
     os.makedirs(os.path.dirname(font_path), exist_ok=True)
 
     if not os.path.isfile(font_path):

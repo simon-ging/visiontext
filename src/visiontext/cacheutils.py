@@ -27,7 +27,7 @@ class CachePlugin:
         verbose: bool = False,
     ):
         if cache_dir is None:
-            cache_dir = user_cache_path("python_visiontext")
+            cache_dir = user_cache_path("visiontext")
         if cache_kwargs is None:
             kwargs_str = "none"
         else:
